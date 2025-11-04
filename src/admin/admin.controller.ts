@@ -3,6 +3,7 @@
 import { updateCustomerStatusDto } from './Dtos/UpdateCustomerStatus.dto';
 import { updateVendorStatus } from './Dtos/UpdateVendorStatus.dto';
 import { GetVendorDto } from './Dtos/GetVendro.dto';
+import { CreateAdminDto } from './Dtos/CreateAdmin,dto';
     // import path from 'path';
 
 
@@ -56,14 +57,17 @@ import { GetVendorDto } from './Dtos/GetVendro.dto';
 
     }
 
-    @Delete('vendors/:id')
-    DeleteVendor(@Param('id') id : string){
-        return this.adminService.DeleteVendor(id);
-    }
+   
 
     @Get('vendor-request')
     getAllVendorRequest(){
         return this.adminService.getAllVendorRequest()
+    }
+
+
+    @Post('add-admin')
+    addAdmin(@Body() createadmin:CreateAdminDto){
+        return createadmin;
     }
 
     }
