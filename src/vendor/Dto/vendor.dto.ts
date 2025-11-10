@@ -1,20 +1,40 @@
+ import { IsString, IsNumber, IsBoolean, IsIn, IsOptional, IsEmail, IsObject } from 'class-validator';
+
 export class CreateServiceDto {
-  title: string;
-  description: string;
-  category: string;
-  price: number;
-  id: number;
-}
- 
-export class UpdateServiceDto {
-  title?: string;
-  description?: string;
-  category?: string;
-  price?: number;
+  @IsString()
+  name: string; 
+  @IsString()
+  description: string; 
+  @IsNumber()
+  price: number; 
+  @IsNumber()
+  duration: number; 
+  @IsIn(['development', 'design'])
+  category: 'development' | 'design'; 
+  @IsBoolean()
+  isActive: boolean;
 }
 
 export class UpdateProfileDto {
-  name?: string;
-  bio?: string;
-  skills?: string[];
+  @IsOptional()
+  @IsString()
+  businessName?: string; 
+  @IsOptional()
+  @IsEmail()
+  email?: string; 
+  @IsOptional()
+  @IsString()
+  contactNumber?: string; 
+  @IsOptional()
+  @IsString()
+  address?: string; 
+  @IsOptional()
+  @IsString()
+  description?: string; 
+  @IsOptional()
+  @IsObject()
+  businessHours?: {
+    open: string;
+    close: string;
+  };
 }
