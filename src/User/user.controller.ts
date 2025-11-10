@@ -1,45 +1,53 @@
-import { Controller, Get, Post, Put, Delete, Patch } from '@nestjs/common';
-import { Body, Param } from '@nestjs/common';
+/* eslint-disable prettier/prettier */
+import { Body, Controller, Delete, Get, Param, Patch, Post} from '@nestjs/common';
 import { UserService } from './user.service';
-import { CreateUserDto } from './dto/user.dto';
-import { LoginUserDto } from './dto/user-login.dto';
-import { BookServiceDto  } from './dto/book-service.dto';
-import { AddReviewDto } from './dto/add-review.dto';
-
+import { CreateUserDto, UpdateServiceStatus } from './dto/user.dto';
+import { BookServiceDto } from './dto/user.dto';
 @Controller('users')
 export class UserController {
   constructor(private readonly userService: UserService) {}
 
-  @Get()
-  getUsers(): string[]{
-    return this.userService.getUserList();
+  @Get() //Get users //add here query where user role are vendors
+  findAll(@Param('role') role:string) {
+    
+    return this.userService.findAll(role);
   }
-  @Get('allServices')
-  getAllService(): string {
-    return this.userService.getAllService();
+  
+  @Get('service')
+findAllService()
+{
+  console.log('Hello');
+  return this.userService.findAllService();
+}
+  @Get(':id')//Get user/:id
+  findOne(@Param('id')id:string) {
+    return this.userService.findOne(id);
   }
-  @Post('register')
-  registerUser(@Body() createUserDto: CreateUserDto) {
-    return this.userService.registerUser(createUserDto);
+
+@Get('service/:id')
+findOne2(@Param('id') id: string) {
+  return this.userService.findOne2(id);
+}
+//add service status update later using patch method
+@Patch('service/:id/status')
+updateServiceStatus(@Param('id')id:string,@Body()updateStatus:UpdateServiceStatus)
+{
+  return this.userService.updateServiceStatus(id,updateStatus);
+}
+
+  @Post('book-service')//Booking service later using post method
+  bookService(@Body() bookService:BookServiceDto)
+  {
+    return this.userService.bookService(bookService);
   }
-  @Post('login')
-  loginUser(@Body() loginUserDto: LoginUserDto) {
-    return this.userService.loginUser(loginUserDto);
+
+  @Post('add-user')//Post user need to add this here later
+  create(@Body() createUser:CreateUserDto)
+  {
+    return this.userService.create(createUser);
   }
-  @Put('profile/:userId')
-  updateUserProfile(@Param('userId') userId: string, @Body() updateUserDto: CreateUserDto) {
-    return this.userService.updateUserProfile(userId, updateUserDto);
-  }
-  @Post('services/:serviceId/book')
-  bookService(@Param('serviceId') serviceId: string, @Body() bookServiceDto: BookServiceDto) {
-    return this.userService.bookService(serviceId, bookServiceDto);
-  }
-  @Delete('bookings/:bookingId')
-  cancelBooking(@Param('bookingId') bookingId: string) {
-    return this.userService.cancelBooking(bookingId);
-  }
-  @Patch('services/:serviceId/status')
-  updateServiceStatus(@Param('serviceId') serviceId: string, @Body() statusUpdate: any) {
-    return this.userService.updateServiceStatus(serviceId, statusUpdate);
+  @Delete(':id')//Delete user/:id
+  delete(@Param('id')id:string) {
+    return this.userService.delete(id);
   }
 }
