@@ -1,7 +1,7 @@
-import {Controller,Get,Post,Delete,Param,Body,Patch,Put, Query 
-} from '@nestjs/common';
+import {Controller,Get,Post,Delete,Param,Body,Patch,Put, Query, UsePipes, ValidationPipe } from '@nestjs/common';
 import { VendorService } from './vendor.service';
-import { CreateServiceDto, UpdateProfileDto } from './Dto/vendor.dto';  
+import { CreateServiceDto, CreateVendorDto, UpdateProfileDto, VendorLoginDto } from './Dto/vendor.dto';  
+ 
 
 @Controller('vendors')
 export class VendorController {
@@ -30,14 +30,32 @@ export class VendorController {
     return this.vendorService.createService(vendorId, createServiceDto);
   }
   @Get('profile')
-    getVendorProfile() {
+    getVendorProfile() { 
         return this.vendorService.getVendorProfile();
     }
+  @Get('profile/:id')
+  getVendorByIdProfile(@Param('id') id: string) {
+    return this.vendorService.getVendorById(id);
+  }
   @Patch('profile/update/:id')
   updateVendorProfile(@Param('id') id: string,@Body() updateProfileDto: UpdateProfileDto, 
   ) 
   {
     return this.vendorService.updateVendorProfile(id, updateProfileDto);
   }
+  @Post('register')
+  @UsePipes(new ValidationPipe())
+  registerVendor(@Body() createVendorDto: CreateVendorDto) {
+    return this.vendorService.registerVendor(createVendorDto);
+  }
+  @Post('login')
+  @UsePipes(new ValidationPipe())
+  LoginVendor(@Body() vendorloginDto:VendorLoginDto){ 
+    return this.vendorService.loginVendor(vendorloginDto);
+  }
+  @Get(':id')
+  getVendorById(@Param('id') id: string) {
+    return this.vendorService.getVendorById(id);
+  } 
 
 }

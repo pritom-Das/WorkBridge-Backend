@@ -1,5 +1,5 @@
-import { Injectable } from '@nestjs/common';
-import { CreateServiceDto, UpdateProfileDto } from './Dto/vendor.dto'; 
+import { ConflictException, Injectable, UnauthorizedException } from '@nestjs/common';
+import { CreateServiceDto, CreateVendorDto, UpdateProfileDto, VendorLoginDto } from './Dto/vendor.dto'; 
 
 @Injectable()
 export class VendorService {
@@ -39,32 +39,38 @@ export class VendorService {
     },
   ];
 
-  private vendors = [
-    {
-      id: '1',
-      businessName: 'Tech Solutions Ltd',
-      email: 'vendor1@example.com', 
-      contactNumber: '+1234567890',
-      address: '123 Business St, City',
-      description: 'Professional tech services',
-      businessHours: {
-        open: '09:00',
-        close: '18:00',
-      },
+ private vendors = [
+  {
+    id: '1',
+    businessName: 'Tech Solutions Ltd',
+    email: 'vendor1@aiub.edu',
+    password: 'SecurePass123',
+    contactNumber: '1234567890',
+    address: '123 Business St, City',
+    description: 'Professional tech services',
+    gender: 'male',   
+    businessHours: {
+      open: '09:00',
+      close: '18:00',
     },
-    {
-      id: '2',
-      businessName: 'Creative Designs',
-      email: 'vendor2@example.com',
-      contactNumber: '+0987654321',
-      address: '456 Creative Ave, Town',
-      description: 'Creative design services',
-      businessHours: {
-        open: '10:00',
-        close: '19:00',
-      },
+    createdAt: new Date('2024-01-15'),   
+  },
+  {
+    id: '2',
+    businessName: 'Creative Designs',
+    email: 'vendor2@aiub.edu',
+    password: 'DesignPass456',
+    contactNumber: '0987654321',
+    address: '456 Creative Ave, Town',
+    description: 'Creative design services',
+    gender: 'female',   
+    businessHours: {
+      open: '10:00',
+      close: '19:00',
     },
-  ]; 
+    createdAt: new Date('2024-01-10'),  
+  },
+]; 
   
   FindAllServices(category?: 'development' | 'design') {
     if (category) {
@@ -110,6 +116,54 @@ export class VendorService {
       return vendor;
     });
     return { message: 'Profile updated successfully', data: this.vendors.find(vendor => vendor.id === id) };  
+  }
+  registerVendor(createVendorDto: CreateVendorDto) { 
+    const existingVendor = this.vendors.find(
+      vendor => vendor.email === createVendorDto.email
+    );
+    
+    if (existingVendor) {
+      throw new ConflictException('Vendor with this email already exists');
+    }
+
+    const newVendor = {
+      id: (this.vendors.length + 1).toString(),
+      ...createVendorDto,
+      description: createVendorDto.description ?? 'No description provided',
+      createdAt: new Date(),
+    };
+
+    this.vendors.push(newVendor);
+     
+    const { password, ...vendorWithoutPassword } = newVendor;
+    return { 
+      message: 'Vendor registered successfully', 
+      data: vendorWithoutPassword 
+    };
+  }
+   
+  loginVendor(loginVendorDto: VendorLoginDto) {
+    const vendor = this.vendors.find(
+      v => v.email === loginVendorDto.email && v.password === loginVendorDto.password
+    );
+ 
+    if (!vendor) {
+      throw new UnauthorizedException('Invalid email or password');
+    }
+ 
+    const { password, ...vendorWithoutPassword } = vendor;
+    return { 
+      message: 'Login successful', 
+      data: vendorWithoutPassword 
+    };
+  }
+  getVendorById(id: string) {
+    const vendor = this.vendors.find(vendor => vendor.id === id);
+    if (vendor) {
+      const { password, ...vendorWithoutPassword } = vendor;
+      return vendorWithoutPassword;
+    }
+    return null;
   }
   
 }
