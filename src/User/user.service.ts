@@ -1,6 +1,7 @@
 /* eslint-disable prettier/prettier */
 import { Injectable } from '@nestjs/common';
-import { BookServiceDto, CreateUserDto, UpdateServiceStatus } from './dto/user.dto';
+import { CreateUserDto, UpdateServiceStatus } from './dto/user.dto';
+import { BookServiceDto } from './dto/bookService.dto';
 
 @Injectable()
 export class UserService {
@@ -45,6 +46,7 @@ private users = [
     "gender":"male",
     "phoneNumber": "01771111221",
     "role": "customer",
+    "password":"12312E"
   
     
   },
@@ -55,6 +57,7 @@ private users = [
     "gender":"female",
     "phoneNumber": "017112331121",
     "role": "customer",
+    "password":"12312D"
  
     
   },
@@ -65,7 +68,7 @@ private users = [
     "gender":"male",
     "phoneNumber": "017112334421",
     "role": "customer",
-    
+    "password":"12312C"
 
     
   },
@@ -76,6 +79,7 @@ private users = [
     "gender":"female",
     "phoneNumber": "017112334421",
     "role": "customer",
+    "password":"12312B"
    
    
   }
@@ -174,8 +178,7 @@ bookService(bookService:BookServiceDto)
  this.service.push(bookService);
   return book;
 }
-create(createUser:CreateUserDto)
-{
+create(createUser: CreateUserDto) {
   const user={...createUser};
   this.users.push(createUser);
   return user;
