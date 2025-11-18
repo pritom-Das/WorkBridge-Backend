@@ -194,7 +194,7 @@ create(createUser: CreateUserDto) {
 
 async updatePhoneNumber(id:string,updatePhoneNumberDto: UpdatePhoneNumberDto)
 {
-  const phoneNumber= await this.userRepo.findOne({where:{id}});
+  const phoneNumber= await this.userRepo.findOne({where:{name:id}});
   if(!phoneNumber)
   {
     return 'User not found';
