@@ -11,7 +11,7 @@ export class VendorEntity {
     @Column({ type: 'int', unsigned: true })
     age: number;
 
-    @Column({ type: 'varchar', default: 'inactive',})
+    @Column({ type: 'varchar', default: 'active',})
     status: 'active' | 'inactive';
 
 }
