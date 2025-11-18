@@ -1,7 +1,6 @@
-/* eslint-disable @typescript-eslint/no-unsafe-call */
 /* eslint-disable prettier/prettier */
 
-import { IsEmail, IsEnum, IsNotEmpty, IsOptional, IsString, Matches } from 'class-validator';
+import { IsEmail, IsEnum, IsNotEmpty, IsOptional, IsString, Matches, Max, Min } from 'class-validator';
 
 export class CreateUserDto {
 
@@ -24,8 +23,9 @@ export class CreateUserDto {
 
     @IsNotEmpty()
     @IsString()
-    @Matches(/^01[0-9]{9}$/, { message: 'Phone number must start with 01 and contain only numbers (total 11 digits)' })
-    phoneNumber: string;
+     @Min(10000000000, { message: 'Phone number must be 11 digits' }) 
+    @Max(19999999999, { message: 'Phone number must be 11 digits' })
+    phoneNumber: number;
 
   @IsEnum(['customer', 'vendor'],{ message: 'Role must be either customer or vendor' })
     role: 'customer' | 'vendor';

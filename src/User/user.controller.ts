@@ -1,33 +1,33 @@
 /* eslint-disable prettier/prettier */
-import { Body, Controller, Delete, Get, Param, Patch, Post, UsePipes, ValidationPipe} from '@nestjs/common';
+import { Body, Controller,Param, Patch, Post, UsePipes, ValidationPipe} from '@nestjs/common';// Delete, Get, 
 import { UserService } from './user.service';
 import { CreateUserDto, UpdateServiceStatus } from './dto/user.dto';
 import { BookServiceDto } from './dto/bookService.dto';
 @Controller('users')
 export class UserController {
   constructor(private readonly userService: UserService) {}
-
-  @Get() //Get users //add here query where user role are vendors
-  findAll(@Param('role') role:string) {
-    
-    return this.userService.findAll(role);
-  }
   
-  @Get('service')
-findAllService()
-{
-  console.log('Hello');
-  return this.userService.findAllService();
-}
-  @Get(':id')//Get user/:id
-  findOne(@Param('id')id:string) {
-    return this.userService.findOne(id);
-  }
+//   @Get() //Get users //add here query where user role are vendors
+//   findAll(@Param('role') role:string) {
 
-@Get('service/:id')
-findOne2(@Param('id') id: string) {
-  return this.userService.findOne2(id);
-}
+//     return this.userService.findAll(role);
+//   }
+  
+//   @Get('service')
+// findAllService()
+// {
+//   console.log('Hello');
+//   return this.userService.findAllService();
+// }
+//   @Get(':id')//Get user/:id
+//   findOne(@Param('id')id:string) {
+//     return this.userService.findOne(id);
+//   }
+
+// @Get('service/:id')
+// findOne2(@Param('id') id: string) {
+//   return this.userService.findOne2(id);
+// }
 
 
 
@@ -54,8 +54,8 @@ updateServiceStatus(@Param('id')id:string,@Body()updateStatus:UpdateServiceStatu
     return this.userService.create(createUser);
   }
 
-  @Delete(':id')//Delete user/:id
-  delete(@Param('id')id:string) {
-    return this.userService.delete(id);
-  }
+  // @Delete(':id')//Delete user/:id
+  // delete(@Param('id')id:string) {
+  //   return this.userService.delete(id);
+  // }
 }
