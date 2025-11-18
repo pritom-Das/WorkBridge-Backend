@@ -141,15 +141,10 @@ export class UserService {
 //     }
 //   ];
 
-//  findAll(role?:string)
-//  {
-//   if(role)
-//   {
-//     return this.users.filter(user=>user.role===role)
-
-//   }
-//   return this.users
-//  }
+ findAll()
+ {
+  return this.userRepo.find();
+ }
 
 //  findOne(id:string) 
 //  {

@@ -6,13 +6,7 @@ import { CreateUserDto, UpdatePhoneNumberDto } from './dto/user.dto';//, UpdateS
 @Controller('users')
 export class UserController {
   constructor(private readonly userService: UserService) {}
-  
-//   @Get() //Get users //add here query where user role are vendors
-//   findAll(@Param('role') role:string) {
 
-//     return this.userService.findAll(role);
-//   }
-  
 //   @Get('service')
 // findAllService()
 // {
@@ -27,6 +21,11 @@ export class UserController {
 //   findOne(@Param('id')id:string) {
 //     return this.userService.findOne(id);
 //   }
+  @Get() //Get users //add here query where user role are vendors
+  findAll() {
+
+    return this.userService.findAll();
+  }
   @Get('null-name')//Get user with null name
   findNullName() {
     return this.userService.findNullName();
