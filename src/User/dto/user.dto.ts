@@ -1,6 +1,6 @@
 /* eslint-disable prettier/prettier */
 
-import { IsEmail, IsEnum, IsNotEmpty, IsOptional, IsString, Matches, Max, Min } from 'class-validator';
+import { IsEmail, IsEnum, IsNotEmpty, IsOptional, IsString, Matches} from 'class-validator';
 
 export class CreateUserDto {
 
@@ -8,7 +8,8 @@ export class CreateUserDto {
     @IsString()
     id:string;
 
-    @IsNotEmpty()
+    // @IsNotEmpty()
+    @IsOptional()
     @IsString()
     name: string;
 
@@ -23,8 +24,9 @@ export class CreateUserDto {
 
     @IsNotEmpty()
     @IsString()
-     @Min(10000000000, { message: 'Phone number must be 11 digits' }) 
-    @Max(19999999999, { message: 'Phone number must be 11 digits' })
+    //  @Min(1000000000, { message: 'Phone number must be 11 digits' }) 
+    // @Max(1999999999, { message: 'Phone number must be 11 digits' })
+    @Matches(/^01\d{9}$/, { message: 'Phone number must be 11 digits and start with 01' })
     phoneNumber: number;
 
   @IsEnum(['customer', 'vendor'],{ message: 'Role must be either customer or vendor' })
@@ -40,5 +42,10 @@ export class UpdateServiceStatus {
  @IsEnum(['active','inactive'],{ message: 'Status must be either active or inactive' })
   status: 'active' | 'inactive';
 }
-
+export class UpdatePhoneNumberDto {
+  @IsNotEmpty()
+  @IsString()
+  @Matches(/^01\d{9}$/, { message: 'Phone number must be 11 digits and start with 01' })
+  phoneNumber: number;
+}
 

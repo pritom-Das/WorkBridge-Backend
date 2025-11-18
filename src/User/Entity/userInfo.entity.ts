@@ -4,8 +4,10 @@ import { v4 as uuidv4 } from 'uuid';
 
 @Entity("userInfo")
 export class UserInfoEntity { 
-    @PrimaryGeneratedColumn()
+    @PrimaryGeneratedColumn('uuid')
         id:string;
+    @Column({ default: true })
+        isActive: boolean;
     @Column({ nullable: true, type: 'varchar' })
     name:string;
     @Column()

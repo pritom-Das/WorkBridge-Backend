@@ -1,11 +1,11 @@
 /* eslint-disable prettier/prettier */
 import { Injectable } from '@nestjs/common';
-import { CreateUserDto, UpdateServiceStatus } from './dto/user.dto';
+import { CreateUserDto, UpdatePhoneNumberDto, UpdateServiceStatus } from './dto/user.dto';
 import { BookServiceDto } from './dto/bookService.dto';
 import { InjectRepository } from '@nestjs/typeorm';
 import { UserInfoEntity } from './Entity/userInfo.entity';
 import { ServiceEntity } from './Entity/service.entity';
-import { Repository } from 'typeorm';
+import { IsNull, Repository } from 'typeorm';
  
 @Injectable()
 export class UserService {
@@ -166,11 +166,12 @@ export class UserService {
 // {
 //   return this.service;
 // }
-//  delete(id:string)//fix the logic here
-//  {
-//   const service = this.service.filter(service=>service.id!==id);
-//   return service;
-//  }
+async findNullName() 
+ {
+  const nullName = await this.userRepo.find({where:[{name:IsNull()},{name:''} ]});
+  console.log(nullName);
+  return nullName;
+ }
 async updateServiceStatus(id: string, updateStatus: UpdateServiceStatus) {
   const status=await this.serviceRepo.findOne({where:{id}});
   if(!status)
@@ -188,7 +189,37 @@ bookService(bookService:BookServiceDto)
 }
 create(createUser: CreateUserDto) {
   
-  const user=this.userRepo.create(createUser);
+  // const user=this.userRepo.create(createUser);
+  const user = this.userRepo.create({
+    ...createUser,
+    phoneNumber: Number(createUser.phoneNumber)
+  });
   return this.userRepo.save(user);
+}
+
+async updatePhoneNumber(id:string,updatePhoneNumberDto: UpdatePhoneNumberDto)
+{
+  const phoneNumber= await this.userRepo.findOne({where:{id}});
+  if(!phoneNumber)
+  {
+    return 'User not found';
+  }
+  phoneNumber.phoneNumber=Number(updatePhoneNumberDto.phoneNumber);
+  
+  return this.userRepo.save(phoneNumber);
+}
+
+async delete(id:string)//fix the logic here
+ {
+  const delUser =await this.userRepo.findOne({where:{id}});
+  if(!delUser)
+  {
+    return 'User not found';
+  }
+  else
+  {
+    await this.userRepo.delete(id);
+    return 'User deleted successfully';  
+  }
 }
   }
