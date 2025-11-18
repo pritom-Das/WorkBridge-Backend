@@ -1,6 +1,6 @@
-import {Controller,Get,Post,Delete,Param,Body,Patch,Put, Query, UsePipes, ValidationPipe } from '@nestjs/common';
+import {Controller,Get,Post,Delete,Param,Body,Patch,Put, Query, UsePipes, ValidationPipe, ParseIntPipe } from '@nestjs/common';
 import { VendorService } from './vendor.service';
-import { CreateServiceDto, CreateVendorDto, UpdateProfileDto, VendorLoginDto } from './Dto/vendor.dto';  
+import { CreateServiceDto, CreateUserDto, CreateVendorDto, UpdateProfileDto, UpdateStatusDto, VendorLoginDto } from './Dto/vendor.dto';  
  
 
 @Controller('vendors')
@@ -53,9 +53,42 @@ export class VendorController {
   LoginVendor(@Body() vendorloginDto:VendorLoginDto){ 
     return this.vendorService.loginVendor(vendorloginDto);
   }
-  @Get(':id')
+ 
+
+  @Post('create')
+  create(@Body() CreateUser:CreateUserDto) 
+  {
+    return this.vendorService.create(CreateUser);
+  }
+  @Get('inactive')
+  getInactiveVendors() {
+    return this.vendorService.getInactiveVendors();
+  }
+  @Patch('status/:id')
+   updateStaus(@Param('id',ParseIntPipe) id: number,@Body() updateStatus:UpdateStatusDto) 
+  {
+    return this.vendorService.updateStatus(id, updateStatus);
+  }
+  @Delete('del/:id')
+  deleteUser(@Param('id',ParseIntPipe) id: number) {
+    return this.vendorService.deleteUser(id);
+  }
+  @Get('range')
+  getUsersInAgeRange()
+  {
+    return this.vendorService.getUsersInAgeRange();
+  }
+  @Get('range/:id')
+  customRange(@Param('id',ParseIntPipe) id:number)
+  {
+    return this.vendorService.customRange(id);
+  }
+  
+
+
+   @Get(':id')
   getVendorById(@Param('id') id: string) {
     return this.vendorService.getVendorById(id);
-  } 
-
+  }
+ 
 }

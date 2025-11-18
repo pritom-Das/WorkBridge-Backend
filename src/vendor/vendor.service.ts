@@ -1,8 +1,12 @@
-import { ConflictException, Injectable, UnauthorizedException } from '@nestjs/common';
-import { CreateServiceDto, CreateVendorDto, UpdateProfileDto, VendorLoginDto } from './Dto/vendor.dto'; 
+import { ConflictException, Injectable, NotFoundException, UnauthorizedException } from '@nestjs/common';
+import { CreateServiceDto, CreateUserDto, CreateVendorDto, UpdateProfileDto, UpdateStatusDto, VendorLoginDto } from './Dto/vendor.dto'; 
+import { VendorEntity } from './vendor.entity';
+import { InjectRepository } from '@nestjs/typeorm';
+import { MoreThan, MoreThanOrEqual, Repository } from 'typeorm';
 
 @Injectable()
 export class VendorService {
+  constructor(@InjectRepository(VendorEntity) private vendorRepo: Repository<VendorEntity>) {}
   private services = [
     {
       id: '1',
@@ -141,12 +145,12 @@ export class VendorService {
       data: vendorWithoutPassword 
     };
   }
-   
+    // Vendor Login
   loginVendor(loginVendorDto: VendorLoginDto) {
     const vendor = this.vendors.find(
       v => v.email === loginVendorDto.email && v.password === loginVendorDto.password
     );
- 
+
     if (!vendor) {
       throw new UnauthorizedException('Invalid email or password');
     }
@@ -155,6 +159,7 @@ export class VendorService {
     return { 
       message: 'Login successful', 
       data: vendorWithoutPassword 
+      
     };
   }
   getVendorById(id: string) {
@@ -165,5 +170,39 @@ export class VendorService {
     }
     return null;
   }
-  
+
+ async create(CreateUser:CreateUserDto)
+  {
+    await this.vendorRepo.create(CreateUser);
+    return this.vendorRepo.save(CreateUser);
+  } 
+  async getInactiveVendors() {
+    return this.vendorRepo.find({ where: { status: 'inactive' } });
+  }
+  async updateStatus(id:number, updateStatus:UpdateStatusDto) {
+    const user = await this.vendorRepo.findOne({ where: { id } });
+
+    if (!user) throw new NotFoundException('User not found');
+
+    user.status = updateStatus.status;
+    return await this.vendorRepo.save(user);
+  }
+  async deleteUser(id:number) {
+    const user = await this.vendorRepo.findOne({ where: { id } });
+    if (!user) {
+    throw new NotFoundException('User not found');
+  }
+  await this.vendorRepo.delete(id);
+  return { message: 'User deleted successfully' };
+  }
+  async getUsersInAgeRange() {
+  return this.vendorRepo.find({
+    where: { age: MoreThan(40) },
+  });
+  }
+  async customRange(id:number) {
+    return this.vendorRepo.find({
+      where: { age: MoreThanOrEqual(id) },
+    });
+  }
 }

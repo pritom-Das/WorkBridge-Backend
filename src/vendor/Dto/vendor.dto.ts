@@ -1,4 +1,4 @@
- import { IsString, IsNumber, IsBoolean, IsIn, IsOptional, IsEmail, IsObject, Contains, Matches, MinLength } from 'class-validator';
+ import { IsString, IsNumber, IsBoolean, IsIn, IsOptional, IsEmail, IsObject, Contains, Matches, MinLength, Max, MaxLength, IsInt, Min, IsNotEmpty } from 'class-validator';
 
 export class CreateServiceDto {
   @IsString()
@@ -65,8 +65,8 @@ export class UpdateProfileDto {
   @IsString()
   address: string;
 
-  @IsIn(['male','female'])
-  gender: 'male' | 'female';
+  @IsIn(['male', 'female'], { message: 'Invalid gender' })
+  gender: 'male' | 'female'; 
 
   @IsOptional()
   @IsString()
@@ -87,4 +87,26 @@ export class VendorLoginDto {
   @MinLength(6, { message: 'Password must be at least 6 characters long' })
   @Matches(/(?=.*[A-Z])/, { message: 'Password must contain at least one uppercase letter' })
   password: string;
+}
+
+export class UpdateStatusDto {
+  @IsIn(['active', 'inactive'])
+  status: 'active' | 'inactive';
+}
+export class CreateUserDto{
+  @IsString()
+  @IsNotEmpty()
+  @MaxLength(100)
+  fullName:string;
+
+  @IsInt()
+  @Min(0)
+   @IsNotEmpty()
+  age:number;
+  
+  @IsOptional()
+  @IsIn(['active','inactive'])
+  status?:'active' | 'inactive';
+
+
 }
