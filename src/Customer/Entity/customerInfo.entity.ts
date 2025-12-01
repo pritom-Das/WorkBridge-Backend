@@ -2,8 +2,8 @@
 import { Entity,Column, PrimaryColumn,BeforeInsert } from "typeorm";
 import { v4 as uuidv4 } from 'uuid';
 
-@Entity("userInfo")
-export class UserInfoEntity { 
+@Entity("customerInfo")
+export class CustomerInfoEntity { 
     @PrimaryColumn('uuid')
         id:string;
      @BeforeInsert()
@@ -25,7 +25,7 @@ export class UserInfoEntity {
     phoneNumber:number;
     @Column({ type: 'enum', enum: ['customer', 'vendor'] })
     role:'customer' | 'vendor';
-    @Column({type:'varchar', length:6})
+    @Column({type:'varchar'})
     password:string;
     
 

@@ -2,7 +2,7 @@
 
 import { IsEmail, IsEnum, IsNotEmpty, IsOptional, IsString, Matches} from 'class-validator';
 
-export class CreateUserDto {
+export class RegisterUserDto {
 
     @IsOptional()
     @IsString()
@@ -37,15 +37,24 @@ export class CreateUserDto {
     @Matches(/^(?=.*[A-Z]).{6,}$/, {message: 'Password must be at least 6 characters long and contain at least one uppercase letter'})
     password:string;
 }
-export class UpdateServiceStatus {
-  @IsNotEmpty()
- @IsEnum(['active','inactive'],{ message: 'Status must be either active or inactive' })
-  status: 'active' | 'inactive';
-}
+// export class UpdateServiceStatus {
+//   @IsNotEmpty()
+//  @IsEnum(['active','inactive'],{ message: 'Status must be either active or inactive' })
+//   status: 'active' | 'inactive';
+// }
 export class UpdatePhoneNumberDto {
   @IsNotEmpty()
   @IsString()
   @Matches(/^01\d{9}$/, { message: 'Phone number must be 11 digits and start with 01' })
   phoneNumber: number;
+}
+export class LoginUserDto {
+   @IsOptional()
+    @IsString()
+    name: string;
+  @IsString()
+  @IsNotEmpty()
+  @Matches(/^(?=.*[A-Z]).{6,}$/, {message: 'Password must be at least 6 characters long and contain at least one uppercase letter'})
+  password: string;
 }
 
