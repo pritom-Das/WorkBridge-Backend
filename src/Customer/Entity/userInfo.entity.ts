@@ -1,11 +1,18 @@
 /* eslint-disable prettier/prettier */
-import { Entity,Column, PrimaryGeneratedColumn,BeforeInsert } from "typeorm";
+import { Entity,Column, PrimaryColumn,BeforeInsert } from "typeorm";
 import { v4 as uuidv4 } from 'uuid';
 
 @Entity("userInfo")
 export class UserInfoEntity { 
-    @PrimaryGeneratedColumn('uuid')
+    @PrimaryColumn('uuid')
         id:string;
+     @BeforeInsert()
+    generateId() {
+        if (!this.id) {
+            this.id = uuidv4();
+        }
+    }
+
     @Column({ default: true })
         isActive: boolean;
     @Column({ nullable: true, type: 'varchar' })
@@ -21,11 +28,5 @@ export class UserInfoEntity {
     @Column({type:'varchar', length:6})
     password:string;
     
-    @BeforeInsert()
-    generateId() {
-        // Only set the ID if it hasn't been set already
-        if (!this.id) {
-            this.id = uuidv4();
-        }
-    }
+
 }

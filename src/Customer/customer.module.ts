@@ -1,22 +1,22 @@
 import { Module } from '@nestjs/common';
-import { UserService } from './user.service';
-import { UserController } from './user.controller';
+import { CustomerService } from './customer.service';
+import { CustomerController } from './customer.controller';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { UserInfoEntity } from './Entity/userInfo.entity';
 import { ServiceEntity } from './Entity/service.entity';
 @Module({
   imports: [TypeOrmModule.forFeature([UserInfoEntity, ServiceEntity])],
-  controllers: [UserController],
-  providers: [UserService],
+  controllers: [CustomerController],
+  providers: [CustomerService],
 })
-export class UserModule {}
+export class CustomerModule {}
 // localhost:3000/users/service/4/status
 // {
 //     "status":"poco"
 // }
 // localhost:3000/users/book-service
 // {
-//     "id":"7",
+//     "id":"7",s
 //     "serviceName":"Dave ",
 //     "category":"a@gmail.com",
 //     "description":"Admin",

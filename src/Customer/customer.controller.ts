@@ -1,18 +1,12 @@
 /* eslint-disable prettier/prettier */
 import { Body, Controller,Delete,Get,Param, Patch, Post, UsePipes, ValidationPipe} from '@nestjs/common';// Delete, Get, 
-import { UserService } from './user.service';
-import { CreateUserDto, UpdatePhoneNumberDto } from './dto/user.dto';//, UpdateServiceStatus
+import { CustomerService } from './customer.service';
+import { CreateUserDto, UpdatePhoneNumberDto } from './dto/customer.dto';//, UpdateServiceStatus
 // import { BookServiceDto } from './dto/bookService.dto';
 @Controller('users')
-export class UserController {
-  constructor(private readonly userService: UserService) {}
-  
-//   @Get() //Get users //add here query where user role are vendors
-//   findAll(@Param('role') role:string) {
+export class CustomerController {
+  constructor(private readonly customerService: CustomerService) {}
 
-//     return this.userService.findAll(role);
-//   }
-  
 //   @Get('service')
 // findAllService()
 // {
@@ -27,11 +21,6 @@ export class UserController {
 //   findOne(@Param('id')id:string) {
 //     return this.userService.findOne(id);
 //   }
-  @Get('null-name')//Get user with null name
-  findNullName() {
-    return this.userService.findNullName();
-  }
-
 // @Patch('service/:id/status')
 // @UsePipes(new ValidationPipe() )//validation pipe added here
 // updateServiceStatus(@Param('id')id:string,@Body()updateStatus:UpdateServiceStatus)
@@ -44,22 +33,31 @@ export class UserController {
   // {
   //   return this.userService.bookService(bookService);
   // }
+  @Get() //Get users //add here query where user role are vendors
+  findAll() {
+
+    return this.customerService.findAll();
+  }
+  @Get('null-name')//Get user with null name
+  findNullName() {
+    return this.customerService.findNullName();
+  }
+
 
   @Post('add-user')//Post user need to add this here later
   @UsePipes(new ValidationPipe() )//validation pipe added here
   create(@Body() createUser:CreateUserDto)
   {
-    return this.userService.create(createUser);
+    return this.customerService.create(createUser);
   }
 @Patch('update-phone/:id')
 @UsePipes(new ValidationPipe() )//validation pipe added here
 updatePhoneNumber(@Param('id')id:string,@Body()updatePhoneNumberDto: UpdatePhoneNumberDto)
 {
-  return this.userService.updatePhoneNumber(id,updatePhoneNumberDto);
+  return this.customerService.updatePhoneNumber(id,updatePhoneNumberDto);
 }
-
   @Delete('/delete/:id')//Delete user/:id
   delete(@Param('id')id:string) {
-    return this.userService.delete(id);
+    return this.customerService.delete(id);
   }
 }
