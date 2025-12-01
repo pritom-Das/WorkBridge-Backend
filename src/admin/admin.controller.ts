@@ -1,15 +1,77 @@
-    import { Body, Controller, Delete, Get, Param, Patch, Post, Query } from '@nestjs/common';
+    import { Body, ConflictException, Controller, Delete, Get, Param, Patch, Post, Query, Req, UploadedFile, UseGuards, UseInterceptors } from '@nestjs/common';
     import { AdminService } from './admin.service';
 import { updateCustomerStatusDto } from './Dtos/UpdateCustomerStatus.dto';
 import { updateVendorStatus } from './Dtos/UpdateVendorStatus.dto';
 import { GetVendorDto } from './Dtos/GetVendro.dto';
-import { CreateAdminDto } from './Dtos/CreateAdmin,dto';
-    // import path from 'path';
+import { CreateAdminDto } from './Dtos/CreateAdmin.dto';
+import { FileInterceptor } from '@nestjs/platform-express';
+import { diskStorage } from 'multer';
+import { LoginDto } from './Dtos/Login.dto';
+import { JwtAuthGuard } from './JwtAuth.guards';
 
 
     @Controller('admin')
     export class AdminController {
         constructor(private readonly adminService:AdminService){}
+    
+        // -------------------- Super Admin Login --------------------
+  @Post('super-login')
+  async superAdminLogin(@Body() loginDto: LoginDto) {
+    return this.adminService.login(loginDto);
+  }
+
+  // -------------------- Admin Login --------------------
+  @Post('login')
+  async adminLogin(@Body() loginDto: LoginDto) {
+    return this.adminService.login(loginDto);
+  }
+
+  // -------------------- Create Admin (Only Super Admin) --------------------
+//   @UseGuards(JwtAuthGuard)
+//   @Post('create')
+//   async createAdmin(@Body() createAdminDto: CreateAdminDto, @Req() req) {
+//     // req.user is populated by JwtStrategy
+//     return this.adminService.createAdmin(createAdminDto, req.user.role);
+//   }
+@UseGuards(JwtAuthGuard)
+@Post('create')
+async createAdmin(@Body() createAdminDto: CreateAdminDto, @Req() req) {
+  // req.user should contain the whole super admin entity, not just role
+  return this.adminService.createAdmin(createAdminDto, req.user);
+}
+
+
+
+//   ...........................customer management.....................//
+
+// @UseGuards(JwtAuthGuard)
+// @Get('customers')
+// async getAllCustomers() {
+//   return this.adminService.getAllCustomers();
+// }
+
+// ......................vendor management .....................//
+
+// @UseGuards(JwtAuthGuard)
+// @Get('vendors')
+// async getAllVendors() {
+//   return this.adminService.getAllVendors();
+// }
+
+
+// ..........................services................
+// @UseGuards(JwtAuthGuard)
+// @Get('services')
+// async getAllServices() {
+//   return this.adminService.getAllServices();
+// }
+
+
+
+
+
+
+
 
     // get all the customers
     @Get('customers')
@@ -39,35 +101,27 @@ import { CreateAdminDto } from './Dtos/CreateAdmin,dto';
    //............................................vendors.......................................................//
 
 
-    @Get("vendors")
-    findAllVendor(@Query() getvendordto:GetVendorDto){
-        return this.adminService.findAllVendor(getvendordto)
-    
-    }
-
-
-    @Get('vendors/:id')
-    findOneVendor(@Param('id') id:string){
-    return this.adminService.findOneVendor(id)
-    }
-
-    @Patch("vendors/:id/updatestatus")
-    updateVendorStatus(@Param('id') id:string, @Body() updateStatus:updateVendorStatus){
-        return this.adminService.updateVendorStatus(id,updateStatus)
-
-    }
-
    
+    // get admin by namesubstring 
+//    @Get('search')
+// async searchUsers(@Query('name') name: string) {
+//   return this.adminService.findAdminByNameSubstring(name);
+// }
 
-    @Get('vendor-request')
-    getAllVendorRequest(){
-        return this.adminService.getAllVendorRequest()
-    }
+// retrive admin by uuid
+// @Get('uuid/:uuid')
+// getAdminByUUID(@Param('uuid') uuid: string) {
+//   return this.adminService.getAdminByUUID(uuid);
+// }
+//   remove admin by email
+// @Delete("remove/:uuid")
+// async removeAdmin(@Param("uuid") uuid: string) {
+//   return this.adminService.removeAdminByEmail(uuid);
+// }
 
+}
 
-    @Post('add-admin')
-    addAdmin(@Body() createadmin:CreateAdminDto){
-        return createadmin;
-    }
-
-    }
+// @Get('active')
+// async getActiveAdmins() {
+//   return this.adminService.getActiveAdmins();
+// }

@@ -1,10 +1,27 @@
-import { Injectable } from '@nestjs/common';
+import { BadRequestException, Injectable, UnauthorizedException } from '@nestjs/common';
 import { updateCustomerStatusDto } from './Dtos/UpdateCustomerStatus.dto';
 import { updateVendorStatus } from './Dtos/UpdateVendorStatus.dto';
 import { GetVendorDto } from './Dtos/GetVendro.dto';
+import { InjectRepository } from '@nestjs/typeorm';
+import { Repository } from 'typeorm';
+import { AdminEntity } from './Enteties/admin.entity';
+import { CreateAdminDto } from './Dtos/CreateAdmin.dto';
+import { promises } from 'dns';
+import { JwtService } from '@nestjs/jwt';
+import { LoginDto } from './Dtos/Login.dto';
+import * as bcrypt from 'bcrypt';
 
 @Injectable()
 export class AdminService {
+  constructor(@InjectRepository(AdminEntity) private adminRepo: Repository<AdminEntity>,
+
+     private readonly jwtService: JwtService,) {}
+
+  // private customerRepo : Repository<CustomerEntity>,
+  // private vendorRepo : Repository<VendorEntity>,
+  // private serviceRepo : Repository<ServiceEntity>
+
+
     private vendors = [
   {
     "id": "1",
@@ -76,6 +93,105 @@ private customers = [
     "status": "blocked"
   }
 ]
+
+//...........................login..................//
+
+async login(loginDto: LoginDto): Promise<{ token: string; role: string }> {
+    const { email, password } = loginDto;
+
+    // Find admin by email
+    const admin = await this.adminRepo.findOne({ where: { email } });
+    if (!admin) throw new UnauthorizedException('Invalid credentials');
+
+    console.log('Login attempt with password:', password);
+
+    console.log('Stored Hash from DB:', admin.password);
+
+    // Compare password
+    const isMatch = await bcrypt.compare(password, admin.password);
+    // 👇 DEBUG STEP 3: See the direct result of the comparison
+    console.log('Bcrypt comparison result:', isMatch);
+    if (!isMatch) throw new UnauthorizedException('Invalid credentials');
+
+    // Generate JWT
+    const payload = { id: admin.id, role: admin.role };
+    const token = this.jwtService.sign(payload);
+
+    return { token, role: admin.role };
+  }
+
+  // -------------------- Create Admin (Only Super Admin) --------------------
+
+  // async createAdmin(createAdminDto: CreateAdminDto, creatorRole: string): Promise<AdminEntity> {
+  //   if (creatorRole !== 'super-admin') {
+  //     throw new UnauthorizedException('Only super admin can create admins');
+  //   }
+
+  //   const { name, email, password } = createAdminDto;
+
+  //   // Check if email already exists
+  //   const existingAdmin = await this.adminRepo.findOne({ where: { email } });
+  //   if (existingAdmin) throw new BadRequestException('Email already exists');
+
+
+
+  //   // Create and save new admin
+  //   const admin = this.adminRepo.create({
+  //     name,
+  //     email,
+  //     password,
+  //     role: 'admin',
+  //   });
+
+  //   return await this.adminRepo.save(admin);
+  // }
+
+  // ...............another method........................//
+  // -------------------- Create Admin (Only Super Admin) --------------------
+async createAdmin(createAdminDto: CreateAdminDto, creator: AdminEntity): Promise<AdminEntity> {
+  if (creator.role !== 'super-admin') {
+    throw new UnauthorizedException('Only super admin can create admins');
+  }
+
+  const { name, email, password } = createAdminDto;
+
+  // Check if email already exists
+  const existingAdmin = await this.adminRepo.findOne({ where: { email } });
+  if (existingAdmin) throw new BadRequestException('Email already exists');
+
+  // Create and save new admin, set createdBy to super admin
+  const admin = this.adminRepo.create({
+    name,
+    email,
+    password,
+    role: 'admin',
+    createdBy: creator, // <-- set the super admin here
+  });
+
+  return await this.adminRepo.save(admin);
+}
+
+
+
+// ................customer service...................
+// async getAllCustomers() {
+//   return await this.customerRepo.find(); // returns all customers
+// }
+
+
+// ................vendor servicess....................
+
+// async getAllVendors() {
+//   return await this.vendorRepo.find(); // returns all vendors
+// }
+
+
+// // ...............services............
+// async getAllServices() {
+//   return await this.serviceRepo.find({ relations: ['vendor'] });
+//   // relations included so you can see which vendor created each service
+// }
+
 // all the function of customer
 findallcustomer(status?: 'blocked' | 'unblocked'){
   if(status){
@@ -137,5 +253,72 @@ updateVendorStatus(id:string,updatestatus:updateVendorStatus){
     return this.vendors.filter((vendor) => vendor.id !== id)
  }   
 
+// //  create admin 
+//  async createAdmin (admindata : CreateAdminDto): Promise <AdminEntity>{
+//   const newAdmin = this.adminRepository.create(admindata)
+//   return await this.adminRepository.save(newAdmin)
+
+//  }
+
+//  get admin by name substring
+// async findAdminByNameSubstring(substring: string): Promise<any> {
+//   const admin = await this.adminRepository
+//     .createQueryBuilder("admin")
+//     .where("admin.name ILIKE :name", { name: `%${substring}%` })
+//     .getMany();
+
+//   if (admin.length === 0) {
+//     return {
+//       message: `No users found matching '${substring}'`,
+//       data: [],
+//     };
+//   }
+
+//   return {
+//     message: "Users retrieved successfully",
+//     data: admin,
+//   };
+// }
+
+// remove admin by email
+// async removeAdminByEmail(uuid: string): Promise<any> {
+//   const admin = await this.adminRepository.findOne({ where: { uuid } });
+
+//   if (!admin) {
+//     return {
+//       message: `No admin found with email '${uuid}'`,
+//     };
+//   }
+
+//   await this.adminRepository.remove(admin);
+
+//   return {
+//     message: `Admin with email '${uuid}' has been removed successfully`,
+//     deletedAdmin: admin
+//   };
+// }
+// retrive admin by uuid
+// async getAdminByUUID(uuid: string): Promise<any> {
+//   const admin = await this.adminRepository.findOne({
+//     where: { uuid },
+//   });
+
+//   if (!admin) {
+//      return {
+//       message: `No admin found with email '${uuid}'`,
+//     };
+  
+//   }
+
+//   return admin;
+// }
+
 
 }
+
+// // async getActiveAdmins(): Promise<AdminEntity[]> {
+//   return await this.adminRepository.find({
+//     where: { status: true },
+//   });
+// }
+
