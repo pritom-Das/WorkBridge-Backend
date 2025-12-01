@@ -1,28 +1,65 @@
-import { Injectable } from '@nestjs/common';
-import { CreateServiceDto, UpdateServiceDto ,UpdateProfileDto} from './Dto/vendor.dto';
+import { ConflictException, Injectable, NotFoundException, UnauthorizedException } from '@nestjs/common'; 
+import { InjectRepository } from '@nestjs/typeorm';
+import { MoreThan, MoreThanOrEqual, Repository } from 'typeorm';
+import { Vendor } from './vendor.entity';
+import { Service } from './service.entity';
+import { CreateVendorDto } from './Dto/create_vendor.dto';
+import * as bcrypt from 'bcrypt';
 
 @Injectable()
 export class VendorService {
-  getVendors(): string {
-    return 'List of vendors';
+  constructor(@InjectRepository(Vendor) private vendorRepo: Repository<Vendor>,
+   @InjectRepository(Service)private serviceRepo: Repository<Service>,) {}
+
+  async createVendor(data:CreateVendorDto){
+  const existingVendor= await this.vendorRepo.findOne({where:{email:data.email}});
+  if(existingVendor){
+    throw new ConflictException('Vendor with this email already exists');
   }
-  getAllServices(): string {
-    return 'List of vendor services';
+  const salt = await bcrypt.genSalt();
+  const hased = await bcrypt.hash(data.password, salt);
+  const vendor=this.vendorRepo.create({...data,password:hased});
+  return this.vendorRepo.save(vendor);
   }
-  addService(createServiceDto: CreateServiceDto) {
-    const { title, category, description, price } = createServiceDto;
-     return `Service titled ${title} in category ${category} with price ${price} has been added.`;
+
+  getAllVendors(){
+    return this.vendorRepo.find({relations:{services:true}});
   }
-  getServiceById(id: number): string {
-    return `Details of service with ID: ${id}`;
+
+  async getVendor(id:number){
+    const vendor= await this.vendorRepo.findOne({where:{id},relations:{services:true}});
+    if(!vendor){
+      throw new NotFoundException('Vendor not found');
+    }
+    return vendor;
   }
-  deleteService(id: number): string {
-    return `Service with ID: ${id} has been deleted.`;
+
+  async updateVendor(id:number, data:Partial<CreateVendorDto>){
+  const vendor= await this.getVendor(id);
+  Object.assign(vendor,data);
+  return this.vendorRepo.save(vendor);
   }
-  updateService(id: number, updateServiceDto: UpdateServiceDto): string {
-    return `Service with ID: ${id} has been updated.`;
+
+  async approveVendor(id:number){
+    const vendor= await this.getVendor(id);
+    vendor.isApproved=true;
+    return this.vendorRepo.save(vendor);
   }
-  updateProfile(id: number, updateProfileDto: UpdateProfileDto): string {
-    return `Profile with ID: ${id} has been updated.`;
-}
+  async deleteVendor(id:number){
+    const vendor= await this.getVendor(id);
+    return this.vendorRepo.remove(vendor);
+  }
+  async createService(vendorId:number, data:Partial<Service>){
+    const vendor= await this.getVendor(vendorId);
+    const service=this.serviceRepo.create({...data,vendor});
+    return this.serviceRepo.save(service);
+  }
+  async getServicesByVendor(vendorId:number){
+  return this.serviceRepo.find({where:{vendor:{id:vendorId}},
+  relations:['vendor']});
+  }
+
+
+
+
 }

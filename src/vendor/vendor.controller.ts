@@ -1,44 +1,49 @@
-import { Controller, Get, Post } from '@nestjs/common';
-import { Body, Delete, Param, Patch, Put } from '@nestjs/common/decorators';
-import { VendorService } from './vendor.service';
-import { CreateServiceDto,UpdateServiceDto,UpdateProfileDto } from './Dto/vendor.dto';
+import {Controller,Get,Post,Delete,Param,Body,Patch,Put, Query, UsePipes, ValidationPipe, ParseIntPipe } from '@nestjs/common';
+import { VendorService } from './vendor.service';   
+import { CreateVendorDto } from './Dto/create_vendor.dto';
+import { UpdateVendorDto } from './Dto/update.dto';
+import { CreateServiceDto } from './Dto/create_service.dto';
+ 
+
 @Controller('vendors')
 export class VendorController {
-    constructor(private readonly vendorService: VendorService) {}
-    @Get('all')
-    getVendors(): string {
-    return this.vendorService.getVendors();
-    }
+  constructor(private readonly vendorService: VendorService) {}
+ 
+  @Post()
+  createVendor(@Body() body: CreateVendorDto){
+    return this.vendorService.createVendor(body);
+  }
 
-    @Get('services')
-    getVendorServices(): string {
-     return this.vendorService.getAllServices();
-    }
-
-  
-
-   @Get('services/:id')
-   getServiceById(@Param('id') id: number) {
-       return this.vendorService.getServiceById(id);
-   }
-
-     @Post('add-service')
-  addService(@Body() createServiceDto: CreateServiceDto) {
-    console.log(createServiceDto.title);
-    console.log(createServiceDto.id); 
-        return this.vendorService.addService(createServiceDto);
-
-    }
-    @Delete('delete-service/:id')
-    deleteService(@Param('id') id: number) { 
-        return this.vendorService.deleteService(id);
-    }
-    @Put('update-service/:id')
-    updateService(@Param('id') id: number, @Body() updateServiceDto: UpdateServiceDto) {
-        return this.vendorService.updateService(id, updateServiceDto);
-    }
-    @Patch('update-profile/:id')
-    updateProfile(@Param('id') id: number, @Body() updateProfileDto: UpdateProfileDto) {
-        return this.vendorService.updateProfile(id, updateProfileDto);
-    }
+  @Get()
+  getAllVendors(){
+    return this.vendorService.getAllVendors();
+  }
+  @Get(':id')
+  getVendor(@Param('id',ParseIntPipe) id:number){
+    return this.vendorService.getVendor(id);
+  }
+  @Put(':id')
+  updateVendor(@Param('id', ParseIntPipe) id: number, @Body() body: UpdateVendorDto) {
+    return this.vendorService.updateVendor(id, body);
+  }
+  @Patch(':id/approve')
+  approveVendor(@Param('id', ParseIntPipe) id: number) {
+    return this.vendorService.approveVendor(id);
+  }
+  @Delete(':id')
+  deleteVendor(@Param('id', ParseIntPipe) id: number) {
+    return this.vendorService.deleteVendor(id);
+  }
+  @Post(':vendorId/services')
+  createService(
+    @Param('vendorId', ParseIntPipe) vendorId: number,
+    @Body() createServiceDto: CreateServiceDto,
+  ) {
+    return this.vendorService.createService(vendorId, createServiceDto);
+  }
+  @Get(':vendorId/services')
+  getServicesByVendor(@Param('vendorId', ParseIntPipe) vendorId: number) {
+    return this.vendorService.getServicesByVendor(vendorId);
+  }
+ 
 }
