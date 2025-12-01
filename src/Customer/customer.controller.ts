@@ -4,8 +4,13 @@ import { CustomerService } from './customer.service';
 import { CreateUserDto, UpdatePhoneNumberDto } from './dto/customer.dto';//, UpdateServiceStatus
 // import { BookServiceDto } from './dto/bookService.dto';
 @Controller('users')
+<<<<<<< HEAD:src/Customer/customer.controller.ts
 export class CustomerController {
   constructor(private readonly customerService: CustomerService) {}
+=======
+export class UserController {
+  constructor(private readonly userService: UserService) {}
+>>>>>>> 7ff94c18d6f7f514966e127cf27524cea8a5e868:src/User/user.controller.ts
 
 //   @Get('service')
 // findAllService()
@@ -21,6 +26,19 @@ export class CustomerController {
 //   findOne(@Param('id')id:string) {
 //     return this.userService.findOne(id);
 //   }
+<<<<<<< HEAD:src/Customer/customer.controller.ts
+=======
+  @Get() //Get users //add here query where user role are vendors
+  findAll() {
+
+    return this.userService.findAll();
+  }
+  @Get('null-name')//Get user with null name
+  findNullName() {
+    return this.userService.findNullName();
+  }
+
+>>>>>>> 7ff94c18d6f7f514966e127cf27524cea8a5e868:src/User/user.controller.ts
 // @Patch('service/:id/status')
 // @UsePipes(new ValidationPipe() )//validation pipe added here
 // updateServiceStatus(@Param('id')id:string,@Body()updateStatus:UpdateServiceStatus)
