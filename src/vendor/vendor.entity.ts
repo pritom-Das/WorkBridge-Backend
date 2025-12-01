@@ -1,17 +1,23 @@
-import { Column, Entity, PrimaryGeneratedColumn } from "typeorm";
+import { Entity, PrimaryGeneratedColumn, Column, OneToMany } from 'typeorm';
+import { Service } from './service.entity';
 
-@Entity('vendor')
-export class VendorEntity {
-    @PrimaryGeneratedColumn({unsigned:true})
-    id: number;
+@Entity()
+export class Vendor {
+  @PrimaryGeneratedColumn()
+  id: number;
 
-    @Column({ type: 'varchar', length: 100 })
-    fullName: string;
+  @Column({ length: 100 })
+  name: string;
 
-    @Column({ type: 'int', unsigned: true })
-    age: number;
+  @Column({ unique: true })
+  email: string;
 
-    @Column({ type: 'varchar', default: 'active',})
-    status: 'active' | 'inactive';
+  @Column()
+  password: string;
 
+  @Column({ default: false })
+  isApproved: boolean;
+
+  @OneToMany(() => Service, (service) => service.vendor)
+  services: Service[];
 }

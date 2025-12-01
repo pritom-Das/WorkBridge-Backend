@@ -1,94 +1,49 @@
 import {Controller,Get,Post,Delete,Param,Body,Patch,Put, Query, UsePipes, ValidationPipe, ParseIntPipe } from '@nestjs/common';
-import { VendorService } from './vendor.service';
-import { CreateServiceDto, CreateUserDto, CreateVendorDto, UpdateProfileDto, UpdateStatusDto, VendorLoginDto } from './Dto/vendor.dto';  
+import { VendorService } from './vendor.service';   
+import { CreateVendorDto } from './Dto/create_vendor.dto';
+import { UpdateVendorDto } from './Dto/update.dto';
+import { CreateServiceDto } from './Dto/create_service.dto';
  
 
 @Controller('vendors')
 export class VendorController {
   constructor(private readonly vendorService: VendorService) {}
-
-  @Get('services')
-  FindAllServices(@Query('category') category?: 'development' | 'design') {
-    return this.vendorService.FindAllServices(category);
+ 
+  @Post()
+  createVendor(@Body() body: CreateVendorDto){
+    return this.vendorService.createVendor(body);
   }
 
-  @Get('services/:id')
-  getServiceById(@Param('id') id: string) {
-    return this.vendorService.getServiceById(id);
+  @Get()
+  getAllVendors(){
+    return this.vendorService.getAllVendors();
   }
-
-  @Delete('services/:id')
-  deleteService(@Param('id') id: string) { 
-    return this.vendorService.deleteService(id);
+  @Get(':id')
+  getVendor(@Param('id',ParseIntPipe) id:number){
+    return this.vendorService.getVendor(id);
   }
-   
-  @Post('services/:vendorId/create')
+  @Put(':id')
+  updateVendor(@Param('id', ParseIntPipe) id: number, @Body() body: UpdateVendorDto) {
+    return this.vendorService.updateVendor(id, body);
+  }
+  @Patch(':id/approve')
+  approveVendor(@Param('id', ParseIntPipe) id: number) {
+    return this.vendorService.approveVendor(id);
+  }
+  @Delete(':id')
+  deleteVendor(@Param('id', ParseIntPipe) id: number) {
+    return this.vendorService.deleteVendor(id);
+  }
+  @Post(':vendorId/services')
   createService(
-    @Param('vendorId') vendorId: string,
+    @Param('vendorId', ParseIntPipe) vendorId: number,
     @Body() createServiceDto: CreateServiceDto,
-  ) { 
+  ) {
     return this.vendorService.createService(vendorId, createServiceDto);
   }
-  @Get('profile')
-    getVendorProfile() { 
-        return this.vendorService.getVendorProfile();
-    }
-  @Get('profile/:id')
-  getVendorByIdProfile(@Param('id') id: string) {
-    return this.vendorService.getVendorById(id);
-  }
-  @Patch('profile/update/:id')
-  updateVendorProfile(@Param('id') id: string,@Body() updateProfileDto: UpdateProfileDto, 
-  ) 
-  {
-    return this.vendorService.updateVendorProfile(id, updateProfileDto);
-  }
-  @Post('register')
-  @UsePipes(new ValidationPipe())
-  registerVendor(@Body() createVendorDto: CreateVendorDto) {
-    return this.vendorService.registerVendor(createVendorDto);
-  }
-  @Post('login')
-  @UsePipes(new ValidationPipe())
-  LoginVendor(@Body() vendorloginDto:VendorLoginDto){ 
-    return this.vendorService.loginVendor(vendorloginDto);
-  }
- 
-
-  @Post('create')
-  create(@Body() CreateUser:CreateUserDto) 
-  {
-    return this.vendorService.create(CreateUser);
-  }
-  @Get('inactive')
-  getInactiveVendors() {
-    return this.vendorService.getInactiveVendors();
-  }
-  @Patch('status/:id')
-   updateStaus(@Param('id',ParseIntPipe) id: number,@Body() updateStatus:UpdateStatusDto) 
-  {
-    return this.vendorService.updateStatus(id, updateStatus);
-  }
-  @Delete('del/:id')
-  deleteUser(@Param('id',ParseIntPipe) id: number) {
-    return this.vendorService.deleteUser(id);
-  }
-  @Get('range')
-  getUsersInAgeRange()
-  {
-    return this.vendorService.getUsersInAgeRange();
-  }
-  @Get('range/:id')
-  customRange(@Param('id',ParseIntPipe) id:number)
-  {
-    return this.vendorService.customRange(id);
-  }
-  
-
-
-   @Get(':id')
-  getVendorById(@Param('id') id: string) {
-    return this.vendorService.getVendorById(id);
+  @Get(':vendorId/services')
+  getServicesByVendor(@Param('vendorId', ParseIntPipe) vendorId: number) {
+    return this.vendorService.getServicesByVendor(vendorId);
   }
  
 }
