@@ -1,7 +1,8 @@
 /* eslint-disable prettier/prettier */
-import { Entity,Column, PrimaryColumn,BeforeInsert } from "typeorm";
+import { Entity,Column, PrimaryColumn,BeforeInsert, OneToMany } from "typeorm";
 import { v4 as uuidv4 } from 'uuid';
-
+import { OrderEntity } from "./order.entitiy";
+import { ReviewEntity } from "./review.entity";
 @Entity("customerInfo")
 export class CustomerInfoEntity { 
     @PrimaryColumn('uuid')
@@ -27,6 +28,11 @@ export class CustomerInfoEntity {
     role:'customer' | 'vendor';
     @Column({type:'varchar'})
     password:string;
-    
+
+    @OneToMany(() => OrderEntity, (order) => order.customer,{ cascade: true })
+    orders: OrderEntity[];
+
+    @OneToMany(() => ReviewEntity, (review) => review.customer,{ cascade: true })
+    reviews: ReviewEntity[];
 
 }

@@ -1,7 +1,9 @@
 /* eslint-disable prettier/prettier */
 import { Body, Controller,Delete,Get,Put,Param, Patch, Post, UsePipes, ValidationPipe} from '@nestjs/common';// Delete, Get, 
 import { CustomerService } from './customer.service';
-import { LoginUserDto, RegisterUserDto, UpdatePhoneNumberDto } from './dto/customer.dto';//, UpdateServiceStatus
+import { LoginUserDto, RegisterUserDto, UpdateUserDto } from './dto/customer.dto';//, UpdateServiceStatus
+import { OrderDto } from './dto/order.dto';
+import { ReviewDto } from './dto/review.dto';
 // import { BookServiceDto } from './dto/bookService.dto';
 @Controller('customer')
 export class CustomerController {
@@ -27,7 +29,7 @@ export class CustomerController {
   }
   @Put('profile/:id/updateProfile')
   @UsePipes(new ValidationPipe() )
-  updateProfile(@Param('id') id: string, @Body() updateUser: RegisterUserDto)
+  updateProfile(@Param('id') id: string, @Body() updateUser:UpdateUserDto)
   {
     return this.customerService.updateProfile(id,updateUser);
   }
@@ -35,26 +37,52 @@ export class CustomerController {
   delete(@Param('id')id:string) {
     return this.customerService.delete(id);
   }
+
   @Get('service')
   findAllService()
   {
     return this.customerService.findAllService();
   }
-// @Get('service/:id')
-// findOne2(@Param('id') id: string) {
-//   return this.userService.findOne2(id);
-// }
-  // @Post('book-service')//Booking service later using post method
-  // @UsePipes(new ValidationPipe() )//validation pipe added here
-  // bookService(@Body() bookService:BookServiceDto)
-  // {
-  //   return this.userService.bookService(bookService);
-  // }
-  // @Get() //Get users //add here query where user role are vendors
-  // findAll() {
+  @Get('service/:id')
+  findOne(@Param('id') id: string) 
+ {
+   return this.customerService.findOne(id);
+ }
 
-  //   return this.customerService.findAll();
-  // }
+
+ @Post('review/service/:id')
+  @UsePipes(new ValidationPipe() )
+  reviewService(@Param('id') id: string, @Body() review:ReviewDto)
+  {
+    return this.customerService.reviewService(id, review);
+  }
+
+  @Get('order/:id')
+  getOrders(@Param('id') id: string)
+  {
+    return this.customerService.getOrders(id);
+  }
+
+  @Post('order/:id')
+  @UsePipes(new ValidationPipe() )//validation pipe added here
+  orderService(@Param('id') id: string, @Body() order:OrderDto)
+  {
+    return this.customerService.orderService(id, order);
+  }
+
+
+  @Put('review/:id/update')
+  @UsePipes(new ValidationPipe() )
+  updateReview(@Param('id') id: string, @Body() review:ReviewDto)
+  {
+    return this.customerService.updateReview(id,review);
+  }
+
+  @Delete('review/:id')
+  deleteReview(@Param('id')id:string) {
+    return this.customerService.deleteReview(id);
+  }
+
   // @Get('null-name')//Get user with null name
   // findNullName() {
   //   return this.customerService.findNullName();

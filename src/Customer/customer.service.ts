@@ -1,17 +1,22 @@
 /* eslint-disable prettier/prettier */
 import { Injectable } from '@nestjs/common';
-import { LoginUserDto, RegisterUserDto, UpdatePhoneNumberDto } from './dto/customer.dto';
-import { BookServiceDto } from './dto/bookService.dto';
+import { LoginUserDto, RegisterUserDto, UpdateUserDto } from './dto/customer.dto';
 import { InjectRepository } from '@nestjs/typeorm';
 import { CustomerInfoEntity } from './Entity/customerInfo.entity';
 import { Service } from '../vendor/service.entity';
-import { IsNull, Repository } from 'typeorm';
+import { Repository } from 'typeorm';
+import { OrderDto } from './dto/order.dto';
+import { OrderEntity } from './Entity/order.entitiy';
+import { ReviewEntity } from './Entity/review.entity';
+import { ReviewDto } from './dto/review.dto';
  
 @Injectable()
 export class CustomerService {
   constructor(
     @InjectRepository(CustomerInfoEntity)private readonly userRepo: Repository<CustomerInfoEntity>,
     @InjectRepository(Service)private readonly serviceRepo: Repository<Service>,
+    @InjectRepository(OrderEntity)private readonly orderRepo: Repository<OrderEntity>,
+    @InjectRepository(ReviewEntity)private readonly reviewRepo: Repository<ReviewEntity>,
    
   ) {}
 
@@ -52,7 +57,7 @@ async getProfile(id:string)
   return profile;
 }
 
-async updateProfile(id:string,updateUser: RegisterUserDto)
+async updateProfile(id:string,updateUser: UpdateUserDto)
 {
   const user= await this.userRepo.findOne({where:{id}});  
   if(!user)
@@ -86,50 +91,74 @@ async findAllService()
   return services;
 }
 
-//   findOne2(id:string) 
-//  {
-//   const service = this.service.find(service=>service.id===id);
-//   return service;
-//  }
-// findAllService()
-// {
-//   return this.service;
-// }
+async findOne(id:string) 
+ {
+  const service =await this.serviceRepo.findOneBy({id});
+  return service;
+ }
 
-// async findNullName() 
-//  {
-//   const nullName = await this.userRepo.find({where:[{name:IsNull()},{name:''} ]});
-  
-//   return nullName;
-//  }
+//Order
+async orderService(id: string,order:OrderDto):Promise<OrderEntity>
+{
+    const customer = await this.userRepo.findOneBy({ id: id });
+  if (!customer) {
+    throw new Error('Customer not found');
+  }
+  const service = await this.serviceRepo.findOneBy({ 
+      id: order.serviceId 
+    });
+      if (!service) {
+        throw new Error("Service not found");
+      }
+  const totalPrice=service.price * order.quantity;
+  const newOrder = new OrderEntity();
+    newOrder.customer = customer;  
+    newOrder.service = service;    
+    newOrder.quantity = order.quantity;
+    newOrder.totalPrice = totalPrice;
+    return this.orderRepo.save(newOrder);
+}
+//not sure
+async getOrders(id: string)
+{
+  const orders = await this.orderRepo.find({where:{customer: {id}}});
+  return orders;
+}
 
-// async updateServiceStatus(id: string, updateStatus: UpdateServiceStatus) {
-//   const status=await this.serviceRepo.findOne({where:{id}});
-//   if(!status)
-//   {
-//     return 'Service not found';
-//   }
-//    status.status = updateStatus.status;
-//   return this.serviceRepo.save(status);
-
-// }
-// bookService(bookService:BookServiceDto)
-// {
-//   const user=this.serviceRepo.create(bookService);
-//   return this.serviceRepo.save(user);
-// }
-
-// async updatePhoneNumber(id:string,updatePhoneNumberDto: UpdatePhoneNumberDto)
-// {
-//   const phoneNumber= await this.userRepo.findOne({where:{name:id}});
-//   if(!phoneNumber)
-//   {
-//     return 'User not found';
-//   }
-//   phoneNumber.phoneNumber=Number(updatePhoneNumberDto.phoneNumber);
-  
-//   return this.userRepo.save(phoneNumber);
-// }
+//Review 
+async reviewService(id: string,review:ReviewDto)
+{
+  const service = await this.serviceRepo.findOneBy({id});
+      if (!service) {
+        throw new Error("Service not found");
+      }
+      const reView=this.reviewRepo.create({
+        rating:review.rating,
+        comment:review.comment,
+        service:service,
+      });
+      return this.reviewRepo.save(reView);
+}
+async updateReview(id: string,review:ReviewDto)
+{
+  const existingReview = await this.reviewRepo.findOneBy({ id });
+  if (!existingReview) {
+    return 'Review not found'; // Throw not found exception later
+  }
+  existingReview.rating = review.rating;
+  existingReview.comment = review.comment;
+  return this.reviewRepo.save(existingReview);
+}
+async deleteReview(id: string)
+{
+  const delReview = await this.reviewRepo.findOneBy({ id });
+  if (!delReview) {
+    return 'Review not found'; // Throw not found exception later
+  } else {
+    await this.reviewRepo.delete(id);
+    return 'Review deleted successfully';
+}
+}
 
 
   }
