@@ -4,6 +4,7 @@ import { CustomerService } from './customer.service';
 import { LoginUserDto, RegisterUserDto, UpdateUserDto } from './dto/customer.dto';//, UpdateServiceStatus
 import { OrderDto } from './dto/order.dto';
 import { ReviewDto } from './dto/review.dto';
+import { OrderEntity } from './Entity/order.entity';
 // import { BookServiceDto } from './dto/bookService.dto';
 @Controller('customer')
 export class CustomerController {
@@ -49,12 +50,13 @@ export class CustomerController {
    return this.customerService.findOne(id);
  }
 
-
- @Post('review/service/:id')
+ 
+ @Post('review/service/:customerId/:serviceId')
   @UsePipes(new ValidationPipe() )
-  reviewService(@Param('id') id: string, @Body() review:ReviewDto)
+  reviewService(@Param('customerId') customerId: string, @Param('serviceId') serviceId: string, @Body() review:ReviewDto
+)
   {
-    return this.customerService.reviewService(id, review);
+    return this.customerService.reviewService(customerId, serviceId, review);
   }
 
   @Get('order/:id')
@@ -77,25 +79,9 @@ export class CustomerController {
   {
     return this.customerService.updateReview(id,review);
   }
-
   @Delete('review/:id')
   deleteReview(@Param('id')id:string) {
     return this.customerService.deleteReview(id);
   }
 
-  // @Get('null-name')//Get user with null name
-  // findNullName() {
-  //   return this.customerService.findNullName();
-  // }
-
-// @Patch('update-phone/:id')
-// @UsePipes(new ValidationPipe() )//validation pipe added here
-// updatePhoneNumber(@Param('id')id:string,@Body()updatePhoneNumberDto: UpdatePhoneNumberDto)
-// {
-//   return this.customerService.updatePhoneNumber(id,updatePhoneNumberDto);
-// }
-//   @Delete('/delete/:id')//Delete user/:id
-//   delete(@Param('id')id:string) {
-//     return this.customerService.delete(id);
-//   }
 }

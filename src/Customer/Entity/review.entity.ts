@@ -4,7 +4,7 @@ import { Service } from '../../vendor/service.entity';
 
 @Entity('reviews')
 export class ReviewEntity {
-  @PrimaryGeneratedColumn('uuid')
+  @PrimaryGeneratedColumn('uuid')//change it
   id: string;
 
   @ManyToOne(() =>  CustomerInfoEntity, (customer) => customer.reviews)

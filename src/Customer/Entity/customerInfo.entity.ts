@@ -1,18 +1,18 @@
 /* eslint-disable prettier/prettier */
-import { Entity,Column, PrimaryColumn,BeforeInsert, OneToMany } from "typeorm";
+import { Entity,Column, PrimaryColumn,BeforeInsert, OneToMany, PrimaryGeneratedColumn } from "typeorm";
 import { v4 as uuidv4 } from 'uuid';
 import { OrderEntity } from "./order.entity";
 import { ReviewEntity } from "./review.entity";
 @Entity("customerInfo")
 export class CustomerInfoEntity { 
-    @PrimaryColumn('uuid')
+    @PrimaryGeneratedColumn()//uuid
         id:string;
-     @BeforeInsert()
-    generateId() {
-        if (!this.id) {
-            this.id = uuidv4();
-        }
-    }
+    //  @BeforeInsert()
+    // generateId() {
+    //     if (!this.id) {
+    //         this.id = uuidv4();
+    //     }
+    // }
 
     @Column({ default: true })
         isActive: boolean;

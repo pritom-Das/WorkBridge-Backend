@@ -9,7 +9,7 @@ export class RegisterUserDto {
 
     @IsNotEmpty()
     @IsEmail()
-    @Matches(/^[A-Za-z0-9._%+-]+@aiub\.edu$/, {message: 'Email must end with @aiub.edu'})
+    // @Matches(/^[A-Za-z0-9._%+-]+@aiub\.edu$/, {message: 'Email must end with @aiub.edu'})
     email: string;
 
   @IsNotEmpty()
@@ -36,7 +36,7 @@ export class UpdateUserDto {
 
   @IsOptional() 
   @IsEmail()
-  @Matches(/^[A-Za-z0-9._%+-]+@aiub\.edu$/, {message: 'Email must end with @aiub.edu'})
+  // @Matches(/^[A-Za-z0-9._%+-]+@aiub\.edu$/, {message: 'Email must end with @aiub.edu'})
   email: string;
 
   @IsOptional() 
@@ -61,7 +61,7 @@ export class UpdateUserDto {
 export class LoginUserDto {
   @IsOptional() 
   @IsEmail()
-  @Matches(/^[A-Za-z0-9._%+-]+@aiub\.edu$/, {message: 'Email must end with @aiub.edu'})
+  // @Matches(/^[A-Za-z0-9._%+-]+@aiub\.edu$/, {message: 'Email must end with @aiub.edu'})
   email: string;
   @IsString()
   @IsNotEmpty()

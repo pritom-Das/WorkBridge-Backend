@@ -98,6 +98,10 @@ async delete(id:string)
 async findAllService()
 {
   const services=await this.serviceRepo.find({where:{isApproved: true}});
+  if(services.length === 0)
+  {
+    throw new NotFoundException('No services found');
+  }
   return services;
 }
 
@@ -110,7 +114,7 @@ async findOne(id:string)
 //Order
 async orderService(id: string,order:OrderDto):Promise<OrderEntity>
 {
-    const customer = await this.userRepo.findOneBy({ id: id });
+    const customer = await this.userRepo.findOneBy({ id});
   if (!customer) {
     throw new NotFoundException('User not found');
   }
@@ -136,19 +140,43 @@ async getOrders(id: string)
 }
 
 //Review 
-async reviewService(id: string,review:ReviewDto)
+// async reviewService(id: string,review:ReviewDto)
+// {
+//   const service = await this.serviceRepo.findOneBy({id});
+//       if (!service) {
+//         throw new NotFoundException("Service not found");
+//       }
+//       const reView=this.reviewRepo.create({
+//         rating:review.rating,
+//         comment:review.comment,
+//         service:service,
+//       });
+//       return this.reviewRepo.save(reView);
+// }
+
+
+async reviewService(customerId: string, 
+  serviceId: string, 
+  review:ReviewDto )
 {
-  const service = await this.serviceRepo.findOneBy({id});
+    const customer = await this.userRepo.findOneBy({ id: customerId });
+  if (!customer) {
+    throw new NotFoundException('User not found');
+  }
+  const service = await this.serviceRepo.findOneBy({id: serviceId});
       if (!service) {
         throw new NotFoundException("Service not found");
       }
       const reView=this.reviewRepo.create({
         rating:review.rating,
         comment:review.comment,
+        customer: customer,
         service:service,
       });
       return this.reviewRepo.save(reView);
 }
+
+
 async updateReview(id: string,review:ReviewDto)
 {
   const existingReview = await this.reviewRepo.findOneBy({ id });
