@@ -1,7 +1,7 @@
 /* eslint-disable prettier/prettier */
 import { Entity,Column, PrimaryColumn,BeforeInsert, OneToMany } from "typeorm";
 import { v4 as uuidv4 } from 'uuid';
-import { OrderEntity } from "./order.entitiy";
+import { OrderEntity } from "./order.entity";
 import { ReviewEntity } from "./review.entity";
 @Entity("customerInfo")
 export class CustomerInfoEntity { 

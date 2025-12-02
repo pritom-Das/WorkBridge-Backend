@@ -59,9 +59,10 @@ export class UpdateUserDto {
 }
 //check login 
 export class LoginUserDto {
-   @IsOptional()
-    @IsString()
-    name: string;
+  @IsOptional() 
+  @IsEmail()
+  @Matches(/^[A-Za-z0-9._%+-]+@aiub\.edu$/, {message: 'Email must end with @aiub.edu'})
+  email: string;
   @IsString()
   @IsNotEmpty()
   @Matches(/^(?=.*[A-Z]).{6,}$/, {message: 'Password must be at least 6 characters long and contain at least one uppercase letter'})

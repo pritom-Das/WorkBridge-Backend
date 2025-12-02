@@ -1,7 +1,7 @@
 import { Entity, PrimaryGeneratedColumn, Column, ManyToOne, OneToMany } from 'typeorm';
 import { Vendor } from './vendor.entity';
-import { OrderEntity } from "../Customer/Entity/order.entitiy";
-import { Review } from 'src/Customer/Entity/review.entity';
+import { OrderEntity } from "../Customer/Entity/order.entity";
+import { ReviewEntity } from 'src/Customer/Entity/review.entity';
 @Entity()
 export class Service {
   @PrimaryGeneratedColumn('uuid')
@@ -24,7 +24,7 @@ export class Service {
   
   @OneToMany(() => OrderEntity, (order) => order.service)
   orders: OrderEntity[];
-  @OneToMany(() => Review, (review) => review.service)
-  reviews: Review[];
+  @OneToMany(() => ReviewEntity, (review) => review.service)
+  reviews: ReviewEntity[];
 
 }
