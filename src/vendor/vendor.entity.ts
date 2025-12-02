@@ -1,5 +1,6 @@
-import { Entity, PrimaryGeneratedColumn, Column, OneToMany } from 'typeorm';
+import { Entity, PrimaryGeneratedColumn, Column, OneToMany, OneToOne, JoinColumn } from 'typeorm';
 import { Service } from './service.entity';
+import { VendorProfile } from './vendor_profile.entity';
 
 @Entity()
 export class Vendor {
@@ -18,6 +19,11 @@ export class Vendor {
   @Column({ default: false })
   isApproved: boolean;
 
-  @OneToMany(() => Service, (service) => service.vendor)
+  @OneToOne(() => VendorProfile, (profile) => profile.vendor,{cascade:true})
+  @JoinColumn()
+  profile: VendorProfile;
+
+  @OneToMany(() => Service, (service) => service.vendor,{cascade:true})
   services: Service[];
+ 
 }
