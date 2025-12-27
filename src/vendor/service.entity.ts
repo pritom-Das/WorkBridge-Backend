@@ -16,6 +16,9 @@ export class Service {
   @Column('decimal')
   price: number;
 
+  @Column({ type: 'boolean', default: false })
+  isApproved: boolean;
+
   @ManyToOne(() => Vendor, (vendor) => vendor.services, { onDelete: 'CASCADE' })
   vendor: Vendor;
 
