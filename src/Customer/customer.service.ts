@@ -139,22 +139,6 @@ async getOrders(id: string)
   return orders;
 }
 
-//Review 
-// async reviewService(id: string,review:ReviewDto)
-// {
-//   const service = await this.serviceRepo.findOneBy({id});
-//       if (!service) {
-//         throw new NotFoundException("Service not found");
-//       }
-//       const reView=this.reviewRepo.create({
-//         rating:review.rating,
-//         comment:review.comment,
-//         service:service,
-//       });
-//       return this.reviewRepo.save(reView);
-// }
-
-
 async reviewService(customerId: string, 
   serviceId: string, 
   review:ReviewDto )
