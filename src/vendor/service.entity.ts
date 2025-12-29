@@ -1,7 +1,8 @@
-import { Entity, PrimaryGeneratedColumn, Column, ManyToOne, OneToMany } from 'typeorm';
+import { Entity, PrimaryGeneratedColumn, Column, ManyToOne, OneToMany, JoinColumn } from 'typeorm';
 import { Vendor } from './vendor.entity';
 import { OrderEntity } from "../Customer/Entity/order.entity";
 import { ReviewEntity } from 'src/Customer/Entity/review.entity';
+import { AdminEntity } from 'src/admin/Enteties/admin.entity';
 @Entity()
 export class Service {
   @PrimaryGeneratedColumn('uuid')
@@ -21,7 +22,11 @@ export class Service {
 
   @ManyToOne(() => Vendor, (vendor) => vendor.services, { onDelete: 'CASCADE' })
   vendor: Vendor;
+
  
+  @ManyToOne(() => AdminEntity, admin => admin.id, { nullable: true })
+  @JoinColumn({ name: 'approvedById' })
+  approvedBy: AdminEntity;
   
   @OneToMany(() => OrderEntity, (order) => order.service)
   orders: OrderEntity[];
