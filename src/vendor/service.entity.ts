@@ -21,9 +21,7 @@ export class Service {
 
   @ManyToOne(() => Vendor, (vendor) => vendor.services, { onDelete: 'CASCADE' })
   vendor: Vendor;
-
-  @Column({ type: 'boolean', default: false })
-  isApproved: boolean;
+ 
   
   @OneToMany(() => OrderEntity, (order) => order.service)
   orders: OrderEntity[];
