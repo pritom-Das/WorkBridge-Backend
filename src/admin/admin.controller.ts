@@ -1,73 +1,99 @@
-    import { Body, Controller, Delete, Get, Param, Patch, Post, Query } from '@nestjs/common';
+    import { Body, ConflictException, Controller, Delete, Get, Param, Patch, Post, Query, Req, UploadedFile, UseGuards, UseInterceptors } from '@nestjs/common';
     import { AdminService } from './admin.service';
 import { updateCustomerStatusDto } from './Dtos/UpdateCustomerStatus.dto';
 import { updateVendorStatus } from './Dtos/UpdateVendorStatus.dto';
 import { GetVendorDto } from './Dtos/GetVendro.dto';
-import { CreateAdminDto } from './Dtos/CreateAdmin,dto';
-    // import path from 'path';
+import { CreateAdminDto } from './Dtos/CreateAdmin.dto';
+import { FileInterceptor } from '@nestjs/platform-express';
+import { diskStorage } from 'multer';
+import { LoginDto } from './Dtos/Login.dto';
+import { JwtAuthGuard } from './JwtAuth.guards';
+import { use } from 'passport';
 
 
     @Controller('admin')
     export class AdminController {
+     
         constructor(private readonly adminService:AdminService){}
-
-    // get all the customers
-    @Get('customers')
-    findallCustomer(@Query('status') status?: 'blocked' | 'unblocked'){
-        return this.adminService.findallcustomer(status)
-    }
-    // get all the customers by id
-    @Get('customers/:id')
-    findOneCustomer(@Param('id') id:string){
-         return this.adminService.findOnecustomer(id)
-    }
-
-    @Delete('customers/:id')
-    DeleteCustomer(@Param('id') id : string){
-       return this.adminService.findOnecustomer(id)
-    }
-
-    @Patch('customers/:id/updatestatus')
-    updateCustomerStatus(@Param('id') id:string,@Body() updateStatus:updateCustomerStatusDto ){
-        return this.adminService.updateCustomerstatus(id,updateStatus)
-    }
-
-    @Delete('/customers:id')
-    deleteAcustomer(@Param('id') id:string){
-        return this.adminService.deleteAcustomer(id)
-    }
-   //............................................vendors.......................................................//
-
-
-    @Get("vendors")
-    findAllVendor(@Query() getvendordto:GetVendorDto){
-        return this.adminService.findAllVendor(getvendordto)
     
-    }
+        // -------------------- Super Admin Login --------------------
+  @Post('super-login')
+  async superAdminLogin(@Body() loginDto: LoginDto) {
+    return this.adminService.login(loginDto);
+  }
+
+  // -------------------- Admin Login --------------------
+  @Post('login')
+  async adminLogin(@Body() loginDto: LoginDto) {
+    return this.adminService.login(loginDto);
+  }
 
 
-    @Get('vendors/:id')
-    findOneVendor(@Param('id') id:string){
-    return this.adminService.findOneVendor(id)
-    }
+@UseGuards(JwtAuthGuard)
+@Post('create')
+async createAdmin(@Body() createAdminDto: CreateAdminDto, @Req() req) {
 
-    @Patch("vendors/:id/updatestatus")
-    updateVendorStatus(@Param('id') id:string, @Body() updateStatus:updateVendorStatus){
-        return this.adminService.updateVendorStatus(id,updateStatus)
-
-    }
-
-   
-
-    @Get('vendor-request')
-    getAllVendorRequest(){
-        return this.adminService.getAllVendorRequest()
-    }
+  return this.adminService.createAdmin(createAdminDto, req.user);
+}
 
 
-    @Post('add-admin')
-    addAdmin(@Body() createadmin:CreateAdminDto){
-        return createadmin;
-    }
+
+//   ...........................customer management.....................//
+
+@UseGuards(JwtAuthGuard)
+@Get('customers')
+getAllCustomers() {
+  return this.adminService.getAllCustomers();
+}
+
+@UseGuards(JwtAuthGuard)
+@Delete('customer/:id')
+deleteCustomer(@Param('id') customerId: string) {
+  return this.adminService.deleteCustomer(customerId);
+}
+
+
+// ......................vendor management .....................//
+
+// get all vendors 
+  @UseGuards(JwtAuthGuard)
+  @Get('vendors')
+  async getAllVendors() {
+    return this.adminService.getAllVendors();
+  }
+
+// delete vendor by id 
+  @UseGuards(JwtAuthGuard)
+  @Delete('vendors/:id')
+  async deleteVendor(@Param('id') id: string) {
+    const vendorId = Number(id); 
+    return this.adminService.deleteVendor(vendorId);
+  }
+
+// ..........................services................
+
+@UseGuards(JwtAuthGuard)
+@Patch('approve-service/:id')
+approveService(@Param('id') serviceId: string, @Req() req) {
+  return this.adminService.approveService(serviceId, req.user.id);
+}
+
+  @Get('pending-services')
+  @UseGuards(JwtAuthGuard)
+  async getPendingServices() {
+    return this.adminService.getPendingServices();
+  }
+  @UseGuards(JwtAuthGuard) 
+@Get('approved-services/:adminId')
+getServicesApprovedByAdmin(@Param('adminId') adminId: string) {
+  return this.adminService.getServicesApprovedByAdmin(adminId);
+
+}
+@UseGuards(JwtAuthGuard)
+@Get('service/:id/approved-by')
+getServiceApprovedBy(@Param('id') serviceId: string) {
+  return this.adminService.getServiceApprovedBy(Number(serviceId));
+}
+
 
     }
