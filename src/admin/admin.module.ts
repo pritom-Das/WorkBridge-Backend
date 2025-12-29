@@ -6,11 +6,14 @@ import { AdminEntity } from './Enteties/admin.entity';
 import { PassportModule } from '@nestjs/passport';
 import { JwtModule } from '@nestjs/jwt';
 import { JwtStrategy } from './jwt.strategy';
+import { Service } from 'src/vendor/service.entity';
+import { Vendor } from 'src/vendor/vendor.entity';
+import { CustomerInfoEntity } from 'src/Customer/Entity/customerInfo.entity';
 
 @Module({
-  imports:[TypeOrmModule.forFeature([AdminEntity]),PassportModule,
+  imports:[TypeOrmModule.forFeature([AdminEntity,Service,Vendor,CustomerInfoEntity]),PassportModule,
     JwtModule.register({
-      secret: 'admin25801', // replace with env variable in production
+      secret: 'admin25801', 
       signOptions: { expiresIn: '1h' },
     }),],
   providers: [AdminService,JwtStrategy],

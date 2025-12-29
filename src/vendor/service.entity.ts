@@ -1,5 +1,6 @@
 import { Entity, PrimaryGeneratedColumn, Column, ManyToOne } from 'typeorm';
 import { Vendor } from './vendor.entity';
+import { AdminEntity } from 'src/admin/Enteties/admin.entity';
 
 @Entity()
 export class Service {
@@ -21,6 +22,6 @@ export class Service {
   @ManyToOne(() => Vendor, (vendor) => vendor.services, { onDelete: 'CASCADE' })
   vendor: Vendor;
 
-  @Column({ type: 'boolean', default: false })
-  isApproved: boolean;
+ @ManyToOne(() => AdminEntity, { nullable: true })
+  approvedBy: AdminEntity;
 }

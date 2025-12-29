@@ -1,4 +1,4 @@
-import { BadRequestException, Injectable, UnauthorizedException } from '@nestjs/common';
+import { BadRequestException, Injectable, NotFoundException, UnauthorizedException } from '@nestjs/common';
 import { updateCustomerStatusDto } from './Dtos/UpdateCustomerStatus.dto';
 import { updateVendorStatus } from './Dtos/UpdateVendorStatus.dto';
 import { GetVendorDto } from './Dtos/GetVendro.dto';
@@ -10,89 +10,17 @@ import { promises } from 'dns';
 import { JwtService } from '@nestjs/jwt';
 import { LoginDto } from './Dtos/Login.dto';
 import * as bcrypt from 'bcrypt';
+import { Service } from 'src/vendor/service.entity';
+import { Vendor } from 'src/vendor/vendor.entity';
+import { CustomerInfoEntity } from 'src/Customer/Entity/customerInfo.entity';
 
 @Injectable()
 export class AdminService {
   constructor(@InjectRepository(AdminEntity) private adminRepo: Repository<AdminEntity>,
-
+    @InjectRepository(Service) private serviceRepo: Repository<Service>,
+    @InjectRepository(Vendor) private vendorRepo: Repository<Vendor>,
+    @InjectRepository(CustomerInfoEntity) private customerRepository : Repository<CustomerInfoEntity>,
      private readonly jwtService: JwtService,) {}
-
-  // private customerRepo : Repository<CustomerEntity>,
-  // private vendorRepo : Repository<VendorEntity>,
-  // private serviceRepo : Repository<ServiceEntity>
-
-
-    private vendors = [
-  {
-    "id": "1",
-    "name": "Rafi Hasan",
-    "email": "rafi.hasan@gmail.com",
-    "role": "vendor",
-    "status": "pending",
-  },
-  {
-    "id": "2",
-    "name": "Nusrat Jahan",
-    "email": "nusrat.jahan@gmail.com",
-    "role": "vendor",
-    "status": "approved",
-    
-  },
-  {
-    "id": "3",
-    "name": "Mehedi Rahman",
-    "email": "mehedi.dev@gmail.com",
-    "role": "vendor",
-    "status": "rejected",
-  
-  }, 
-   {
-    "id": "4",
-    "name": "pritom das",
-    "email": "pritom@gmail.com",
-    "role": "vendor",
-    "status": "pending",
-  },
-]
-
-private customers = [
-  {
-    "id": "1",
-    "name": "Tanvir Alam",
-    "email": "tanvir.alam@gmail.com",
-    "role": "customer",
-    "totalBookings": 5,
-    "totalSpent": 4200,
-    "status": "unblocked"
-  },
-  {
-    "id": "2",
-    "name": "Rima Khatun",
-    "email": "rima.khatun@gmail.com",
-    "role": "customer",
-    "totalBookings": 2,
-    "totalSpent": 1500,
-    "status": "blocked"
-  },
-  {
-    "id": "3",
-    "name": "Shahriar Hossain",
-    "email": "mim.akter@gmail.com",
-    "role": "customer",
-    "totalBookings": 8,
-    "totalSpent": 7200,
-    "status": "unblocked"
-  },
-  {
-    "id": "4",
-    "name": "Mim Akter",
-    "email": "mim.akter@gmail.com",
-    "role": "customer",
-    "totalBookings": 1,
-    "totalSpent": 300,
-    "status": "blocked"
-  }
-]
 
 //...........................login..................//
 
@@ -109,7 +37,7 @@ async login(loginDto: LoginDto): Promise<{ token: string; role: string }> {
 
     // Compare password
     const isMatch = await bcrypt.compare(password, admin.password);
-    // 👇 DEBUG STEP 3: See the direct result of the comparison
+ 
     console.log('Bcrypt comparison result:', isMatch);
     if (!isMatch) throw new UnauthorizedException('Invalid credentials');
 
@@ -146,7 +74,7 @@ async login(loginDto: LoginDto): Promise<{ token: string; role: string }> {
   //   return await this.adminRepo.save(admin);
   // }
 
-  // ...............another method........................//
+
   // -------------------- Create Admin (Only Super Admin) --------------------
 async createAdmin(createAdminDto: CreateAdminDto, creator: AdminEntity): Promise<AdminEntity> {
   if (creator.role !== 'super-admin') {
@@ -165,7 +93,7 @@ async createAdmin(createAdminDto: CreateAdminDto, creator: AdminEntity): Promise
     email,
     password,
     role: 'admin',
-    createdBy: creator, // <-- set the super admin here
+    createdBy: creator, 
   });
 
   return await this.adminRepo.save(admin);
@@ -174,151 +102,122 @@ async createAdmin(createAdminDto: CreateAdminDto, creator: AdminEntity): Promise
 
 
 // ................customer service...................
-// async getAllCustomers() {
-//   return await this.customerRepo.find(); // returns all customers
-// }
+async getAllCustomers() {
+  return this.customerRepository.find();
+}
+
+async deleteCustomer(customerId: string) {
+  const customer = await this.customerRepository.findOne({
+    where: { id: customerId }
+  });
+
+  if (!customer) {
+    throw new NotFoundException('Customer not found');
+  }
+
+  return this.customerRepository.remove(customer);
+}
+
 
 
 // ................vendor servicess....................
 
-// async getAllVendors() {
-//   return await this.vendorRepo.find(); // returns all vendors
-// }
-
-
-// // ...............services............
-// async getAllServices() {
-//   return await this.serviceRepo.find({ relations: ['vendor'] });
-//   // relations included so you can see which vendor created each service
-// }
-
-// all the function of customer
-findallcustomer(status?: 'blocked' | 'unblocked'){
-  if(status){
-    return this.customers.filter(customer => customer.status === status)
+// -------------------- Get All Vendors --------------------
+  async getAllVendors(): Promise<Vendor[]> {
+    return this.vendorRepo.find({
+      relations: ['services'], // include services if needed
+    });
   }
-return this.customers
-}
 
+  // -------------------- Delete Vendor By ID --------------------
+  async deleteVendor(vendorId: number): Promise<{ message: string }> {
+    const vendor = await this.vendorRepo.findOne({ where: { id: vendorId } });
+    if (!vendor) throw new NotFoundException('Vendor not found');
 
-findOnecustomer(id : string){
-  const customer = this.customers.find(customer => customer.id === id)
-  return customer
-}
-
-updateCustomerstatus(id:string, updatestatus:updateCustomerStatusDto){
-  this.customers = this.customers.map(customer =>{
-    if(customer.id === id){
-      return {...customer,status:updatestatus.status}
-    }
-    return customer
-  })
-  return this.customers.find(customer => customer.id === id);
-}
-
-deleteAcustomer(id:string){
-  return this.customers.filter(customer => customer.id !== id)
-}
-/////////////......................................................................................................../////////////////
-// alll the functions of vendors
- findAllVendor(getvendordto : GetVendorDto){
-  const {status} = getvendordto
-  if(status){
-    return this.vendors.filter(vn => vn.status === status)
+    await this.vendorRepo.remove(vendor);
+    return { message: `Vendor with id ${vendorId} has been deleted.` };
   }
-    return this.vendors
- }
 
-findOneVendor(id:String){
-    const vendor = this.vendors.find(vendor => vendor.id === id)
-    return vendor;
+
+// // ...............services management............
+
+async approveService(serviceId: string, adminId: string) {
+  const id = Number(serviceId);
+
+  const service = await this.serviceRepo.findOne({
+    where: { id },
+  });
+
+  if (!service) {
+    throw new NotFoundException('Service not found');
+  }
+
+  if (service.isApproved) {
+    throw new BadRequestException('Already approved');
+  }
+
+  const admin = await this.adminRepo.findOne({
+    where: { id: adminId }
+  });
+
+  if (!admin) {
+    throw new UnauthorizedException('Invalid admin');
+  }
+
+  service.isApproved = true;
+  service.approvedBy = admin;
+
+  return await this.serviceRepo.save(service);
 }
 
-getAllVendorRequest(){
-    const vendorsRuests = this.vendors.filter((vendor) => vendor.status === 'pending')
-    return vendorsRuests;
+ async getPendingServices() {
+    return this.serviceRepo.find({
+      where: { isApproved: false },
+    });
+  }
+
+async getServicesApprovedByAdmin(adminId: string) {
+  const id = Number(adminId); 
+
+  const admin = await this.adminRepo.findOne({ where: { id:adminId } });
+  if (!admin) throw new NotFoundException('Admin not found');
+
+
+  const services = await this.serviceRepo.find({
+    where: { approvedBy: { id: admin.id } },
+    relations: ['vendor', 'approvedBy'], 
+  });
+
+  return services;
 }
 
-updateVendorStatus(id:string,updatestatus:updateVendorStatus){
-        this.vendors = this.vendors.map((vendor) =>{
-            if(vendor.id === id){
-                return{...vendor,status:updatestatus.status}
-            }
-            return vendor;
-        })
-        return  this.vendors.find(vendor => vendor.id === id)
+async getServiceApprovedBy(serviceId: number) {
+  const service = await this.serviceRepo.findOne({
+    where: { id: serviceId },
+    relations: ['approvedBy'], 
+  });
+
+  if (!service) {
+    throw new NotFoundException("Service not found");
+  }
+
+  if (!service.approvedBy) {
+    return { message: "This service is not approved yet" };
+  }
+
+
+  return {
+    serviceId: service.id,
+    approvedBy: {
+      id: service.approvedBy.id,
+      name: service.approvedBy.name,
+      email: service.approvedBy.email,
+      role: service.approvedBy.role
     }
-
- DeleteVendor(id:string){
-    return this.vendors.filter((vendor) => vendor.id !== id)
- }   
-
-// //  create admin 
-//  async createAdmin (admindata : CreateAdminDto): Promise <AdminEntity>{
-//   const newAdmin = this.adminRepository.create(admindata)
-//   return await this.adminRepository.save(newAdmin)
-
-//  }
-
-//  get admin by name substring
-// async findAdminByNameSubstring(substring: string): Promise<any> {
-//   const admin = await this.adminRepository
-//     .createQueryBuilder("admin")
-//     .where("admin.name ILIKE :name", { name: `%${substring}%` })
-//     .getMany();
-
-//   if (admin.length === 0) {
-//     return {
-//       message: `No users found matching '${substring}'`,
-//       data: [],
-//     };
-//   }
-
-//   return {
-//     message: "Users retrieved successfully",
-//     data: admin,
-//   };
-// }
-
-// remove admin by email
-// async removeAdminByEmail(uuid: string): Promise<any> {
-//   const admin = await this.adminRepository.findOne({ where: { uuid } });
-
-//   if (!admin) {
-//     return {
-//       message: `No admin found with email '${uuid}'`,
-//     };
-//   }
-
-//   await this.adminRepository.remove(admin);
-
-//   return {
-//     message: `Admin with email '${uuid}' has been removed successfully`,
-//     deletedAdmin: admin
-//   };
-// }
-// retrive admin by uuid
-// async getAdminByUUID(uuid: string): Promise<any> {
-//   const admin = await this.adminRepository.findOne({
-//     where: { uuid },
-//   });
-
-//   if (!admin) {
-//      return {
-//       message: `No admin found with email '${uuid}'`,
-//     };
-  
-//   }
-
-//   return admin;
-// }
+  };
+}
 
 
 }
 
-// // async getActiveAdmins(): Promise<AdminEntity[]> {
-//   return await this.adminRepository.find({
-//     where: { status: true },
-//   });
-// }
 

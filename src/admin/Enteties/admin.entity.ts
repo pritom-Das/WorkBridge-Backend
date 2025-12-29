@@ -40,24 +40,6 @@ export class AdminEntity {
   createdAdmins: AdminEntity[];
 
 
-  // this will be added in the vendorentity 
-
-// @ManyToOne(() => AdminEntity, admin => admin.approvedVendors)
-// approvedBy: AdminEntity;
-
-// for adminentity
-// @OneToMany(() => VendorEntity, vendor => vendor.approvedBy)
-// approvedVendors: VendorEntity[];
-
-
-// in customer entity 
-// @ManyToOne(() => AdminEntity, admin => admin.approvedCustomers)
-// approvedBy: AdminEntity;
-
-// for admin entity 
-// @OneToMany(() => CustomerEntity, customer => customer.approvedBy)
-// approvedCustomers: CustomerEntity[];
-
 
 
 }
