@@ -7,11 +7,12 @@ import { Service } from '../vendor/service.entity';
 import { JwtModule } from '@nestjs/jwt';
 import { OrderEntity } from './Entity/order.entity';
 import { ReviewEntity } from './Entity/review.entity';
+import { PassportModule } from '@nestjs/passport';
 @Module({
-  imports: [TypeOrmModule.forFeature([CustomerInfoEntity,OrderEntity, ReviewEntity, Service]),
+  imports: [TypeOrmModule.forFeature([CustomerInfoEntity,OrderEntity, ReviewEntity, Service]),PassportModule,
       JwtModule.register({
-      secret: 'YOUR_SECRET_KEY',
-      signOptions: { expiresIn: '1d' },
+      secret: 'admin25801', 
+      signOptions: { expiresIn: '1h' },
     }),
 ],
 

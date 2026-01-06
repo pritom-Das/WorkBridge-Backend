@@ -1,9 +1,11 @@
 /* eslint-disable prettier/prettier */
-import { Body, Controller,Delete,Get,Put,Param, Patch, Post, UsePipes, ValidationPipe} from '@nestjs/common';// Delete, Get, 
+import { Body, Controller,Delete,Get,Put,Param, Patch, Post, UsePipes, ValidationPipe, Res} from '@nestjs/common';// Delete, Get, 
 import { CustomerService } from './customer.service';
 import { LoginUserDto, RegisterUserDto, UpdateUserDto } from './dto/customer.dto';//, UpdateServiceStatus
 import { OrderDto } from './dto/order.dto';
 import { ReviewDto } from './dto/review.dto';
+import type { Response } from 'express'; 
+import { JwtAuthGuard } from '../admin/JwtAuth.guards';  
 import { OrderEntity } from './Entity/order.entity';
 // import { BookServiceDto } from './dto/bookService.dto';
 @Controller('customer')
@@ -16,12 +18,29 @@ export class CustomerController {
   {
     return this.customerService.register(RegisterUser);
   }
+  // @Post('login')
+  // @UsePipes(new ValidationPipe() )
+  // login(@Body() loginUser:LoginUserDto)
+  // {
+  //   return this.customerService.login(loginUser);
+  // }
+  // Login - Public (Sets httpOnly Cookie)
   @Post('login')
-  @UsePipes(new ValidationPipe() )
-  login(@Body() loginUser:LoginUserDto)
-  {
-    return this.customerService.login(loginUser);
+  async login(@Body() body: LoginUserDto, @Res({ passthrough: true }) res: Response) {
+    const result = await this.customerService.login(body);
+    
+    
+    res.cookie('token', result.access_token, {
+      httpOnly: true,  
+      secure: false,   
+      sameSite: 'lax',
+      maxAge: 3600000,  
+    });
+
+    return { message: 'Login successful' };
   }
+
+
 
   @Get('profile/:id')
   getProfile(@Param('id') id: string) 

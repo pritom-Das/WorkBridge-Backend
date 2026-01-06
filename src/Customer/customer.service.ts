@@ -37,25 +37,47 @@ async register(createUser: RegisterUserDto) {
  
 }
 
-async login(loginUser:LoginUserDto)
-{
-  const user= await this.userRepo.findOne({where:{email:loginUser.email}});
+// async login(loginUser:LoginUserDto)
+// {
+//   const user= await this.userRepo.findOne({where:{email:loginUser.email}});
  
-   if (!user) {
-    throw new NotFoundException('User not found');
-  }
-const match= await bcrypt.compare(loginUser.password, user.password);
- if(!match)
- {
-  throw new UnauthorizedException('Invalid credentials');
- }
- const payload = { id: user.id, role: 'customer' };
+//    if (!user) {
+//     throw new NotFoundException('User not found');
+//   }
+// const match= await bcrypt.compare(loginUser.password, user.password);
+//  if(!match)
+//  {
+//   throw new UnauthorizedException('Invalid credentials');
+//  }
+//  const payload = { id: user.id, role: 'customer' };
  
-  return {
-    access_token: await this.jwtService.signAsync(payload),
-  };
+//   return {
+//     access_token: await this.jwtService.signAsync(payload),
+//   };
 
-}
+// }
+
+  // Login Logic for Task
+  async login(data: LoginUserDto) {
+    const user = await this.userRepo.findOne({ where: { email: data.email } });
+    
+    if (!user) {
+      throw new UnauthorizedException('Invalid credentials');
+    }
+
+    const isMatch = await bcrypt.compare(data.password, user.password);
+    if (!isMatch) {
+      throw new UnauthorizedException('Invalid credentials');
+    }
+
+    // Creating the payload for the JWT
+    const payload = { id: user.id, email: user.email, role: 'customer' };
+    return {
+      access_token: this.jwtService.sign(payload),
+    };
+  }
+
+
 
 async getProfile(id:string)
 {
