@@ -100,7 +100,7 @@ async updateProfile(id:string,updateUser: UpdateUserDto)
   user.email = updateUser.email;
   user.password = updateUser.password;
   user.gender = updateUser.gender;
-  user.phoneNumber = Number(updateUser.phoneNumber);
+  user.phoneNumber = String(updateUser.phoneNumber);
   return this.userRepo.save(user);
 }
 async delete(id:string)

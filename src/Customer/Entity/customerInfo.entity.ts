@@ -23,7 +23,7 @@ export class CustomerInfoEntity {
     @Column({ type: 'enum', enum: ['male', 'female', 'other'] })
     gender:'male' | 'female' | 'other';
     @Column({ type: 'bigint', unsigned: true })
-    phoneNumber:number;
+    phoneNumber:string;
     @Column({ type: 'enum', enum: ['customer', 'vendor'] })
     role:'customer' | 'vendor';
     @Column({type:'varchar'})

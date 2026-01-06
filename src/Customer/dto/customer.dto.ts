@@ -19,7 +19,7 @@ export class RegisterUserDto {
     @IsNotEmpty()
     @IsString()
     @Matches(/^01\d{9}$/, { message: 'Phone number must be 11 digits and start with 01' })
-    phoneNumber: number;
+    phoneNumber: string;
 
   @IsEnum(['customer', 'vendor'],{ message: 'Role must be either customer or vendor' })
     role: 'customer' | 'vendor';
@@ -31,7 +31,8 @@ export class RegisterUserDto {
     
     @IsString()
     @IsNotEmpty()
-    @Matches(/^(?=.*[A-Z]).{6,}$/, {message: 'Password must be at least 6 characters long and contain at least one uppercase letter'})
+   // @Matches(/^(?=.*[A-Z]).{6,}$/, {message: 'Password must be at least 6 characters long and contain at least one uppercase letter'})
+   @Matches(/^.{6,}$/, {message: 'Password must be at least 6 characters'})
     password:string;
 }
 export class UpdateUserDto {
