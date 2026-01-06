@@ -1,6 +1,6 @@
 /* eslint-disable prettier/prettier */
 
-import { IsEmail, IsEnum, IsNotEmpty, IsOptional, IsString, Matches} from 'class-validator';
+import { IsEmail, IsEnum, IsNotEmpty, IsOptional, IsString, Matches,MinLength} from 'class-validator';
 
 export class RegisterUserDto {
     @IsNotEmpty()
@@ -23,6 +23,11 @@ export class RegisterUserDto {
 
   @IsEnum(['customer', 'vendor'],{ message: 'Role must be either customer or vendor' })
     role: 'customer' | 'vendor';
+
+    @IsNotEmpty() // Added address to match frontend
+  @IsString()
+  @MinLength(5)
+  address: string;
     
     @IsString()
     @IsNotEmpty()

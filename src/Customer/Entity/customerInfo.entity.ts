@@ -28,6 +28,8 @@ export class CustomerInfoEntity {
     role:'customer' | 'vendor';
     @Column({type:'varchar'})
     password:string;
+    @Column({nullable:true})
+    address:string;
 
     @OneToMany(() => OrderEntity, (order) => order.customer,{ cascade: true })
     orders: OrderEntity[];
