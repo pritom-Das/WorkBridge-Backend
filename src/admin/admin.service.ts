@@ -24,29 +24,44 @@ export class AdminService {
 
 //...........................login..................//
 
-async login(loginDto: LoginDto): Promise<{ token: string; role: string }> {
-    const { email, password } = loginDto;
+// async login(loginDto: LoginDto): Promise<{ token: string; role: string }> {
+//     const { email, password } = loginDto;
 
-    // Find admin by email
-    const admin = await this.adminRepo.findOne({ where: { email } });
-    if (!admin) throw new UnauthorizedException('Invalid credentials');
+//     // Find admin by email
+//     const admin = await this.adminRepo.findOne({ where: { email } });
+//     if (!admin) throw new UnauthorizedException('Invalid credentials');
 
-    console.log('Login attempt with password:', password);
+//     console.log('Login attempt with password:', password);
 
-    console.log('Stored Hash from DB:', admin.password);
+//     console.log('Stored Hash from DB:', admin.password);
 
-    // Compare password
-    const isMatch = await bcrypt.compare(password, admin.password);
+//     // Compare password
+//     const isMatch = await bcrypt.compare(password, admin.password);
  
-    console.log('Bcrypt comparison result:', isMatch);
-    if (!isMatch) throw new UnauthorizedException('Invalid credentials');
+//     console.log('Bcrypt comparison result:', isMatch);
+//     if (!isMatch) throw new UnauthorizedException('Invalid credentials');
 
-    // Generate JWT
-    const payload = { id: admin.id, role: admin.role };
-    const token = this.jwtService.sign(payload);
+//     // Generate JWT
+//     const payload = { id: admin.id, role: admin.role };
+//     const token = this.jwtService.sign(payload);
 
-    return { token, role: admin.role };
-  }
+//     return { token, role: admin.role };
+//   }
+async login(loginDto: LoginDto): Promise<{ token: string; role: string }> {
+  const { email, password } = loginDto;
+
+  const admin = await this.adminRepo.findOne({ where: { email } });
+  if (!admin) throw new UnauthorizedException('Invalid credentials');
+
+  const isMatch = await bcrypt.compare(password, admin.password);
+  if (!isMatch) throw new UnauthorizedException('Invalid credentials');
+
+  const payload = { id: admin.id, role: admin.role };
+  const token = this.jwtService.sign(payload);
+
+  return { token, role: admin.role };
+}
+
 
   // -------------------- Create Admin (Only Super Admin) --------------------
 
