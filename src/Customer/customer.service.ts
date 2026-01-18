@@ -57,6 +57,7 @@ const match= await bcrypt.compare(loginUser.password, user.password);
 
 }
 
+
 async getProfile(id:string)
 {
   const profile=await  this.userRepo.findOne({where:{id}});

@@ -24,6 +24,13 @@ import type { Response } from 'express';
     return this.adminService.login(loginDto);
   }
 
+  //...........................get all admin.....................//
+@UseGuards(JwtAuthGuard)
+@Get('alladmins')
+async getAllAdmins() {
+  return this.adminService.getAllAdmins();
+}
+
   // -------------------- Admin Login --------------------
   // @Post('login')
   // async adminLogin(@Body() loginDto: LoginDto) {
@@ -55,6 +62,18 @@ async createAdmin(@Body() createAdminDto: CreateAdminDto, @Req() req) {
   return this.adminService.createAdmin(createAdminDto, req.user);
 }
 
+@Post('logout')
+async logout(@Res({ passthrough: true }) res: Response) {
+  // Clearing the cookie by setting its expiration date to the past
+  res.cookie('access_token', '', {
+    httpOnly: true,
+    expires: new Date(0), // Expire immediately
+    sameSite: 'lax',
+    secure: false, // Match your login config (true in production)
+  });
+
+  return { message: 'Logout successful' };
+}
 
 
 //   ...........................customer management.....................//
@@ -99,6 +118,13 @@ deleteCustomer(@Param('id') customerId: string) {
 
 // ..........................services................
 
+
+ @UseGuards(JwtAuthGuard)
+  @Get('services')
+  async getAllServices() {
+    return await this.adminService.getAllServices();
+  }
+  
 @UseGuards(JwtAuthGuard)
 @Patch('approve-service/:id')
 approveService(@Param('id') serviceId: string, @Req() req) {

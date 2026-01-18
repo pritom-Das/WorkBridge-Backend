@@ -113,6 +113,23 @@ async createAdmin(createAdminDto: CreateAdminDto, creator: AdminEntity): Promise
 
   return await this.adminRepo.save(admin);
 }
+//.............................get all admins..................//
+async getAllAdmins(): Promise<AdminEntity[]> {
+  return await this.adminRepo.find({
+    relations: ['createdBy'],
+    select: {
+      id: true,
+      name: true,
+      email: true,
+      role: true,
+      created_at: true,
+      createdBy: {
+        id: true,
+        name: true,
+      }
+    }
+  });
+}
 
 
 
@@ -159,6 +176,7 @@ async deleteCustomer(customerId: string) {
 async approveService(serviceId: string, adminId: string) {
   const service = await this.serviceRepo.findOne({
     where: { id: serviceId },
+    relations: ['approvedBy'], 
   });
 
   if (!service) {
@@ -180,9 +198,26 @@ async approveService(serviceId: string, adminId: string) {
   service.isApproved = true;
   service.approvedBy = admin;
 
-  return await this.serviceRepo.save(service);
-}
+  // Save the service
+  const updatedService = await this.serviceRepo.save(service);
 
+  // Return only the data you want the frontend to see
+  return {
+    id: updatedService.id,
+    title: updatedService.title,
+    isApproved: updatedService.isApproved,
+    approvedBy: {
+      name: admin.name,
+      email: admin.email,
+      role: admin.role,
+    },
+  };
+}
+async getAllServices() {
+  return this.serviceRepo.find({
+    relations: ['vendor'] 
+  });
+}
  async getPendingServices() {
     return this.serviceRepo.find({
       where: { isApproved: false },
@@ -230,6 +265,82 @@ async getServiceApprovedBy(serviceId: number) {
   };
 }
 
+
+//....................................................//
+
+// async approveService(serviceId: string, adminId: string) {
+//   const service = await this.serviceRepo.findOne({
+//     where: { id: serviceId },
+//   });
+
+//   if (!service) {
+//     throw new NotFoundException('Service not found');
+//   }
+
+//   if (service.isApproved) {
+//     throw new BadRequestException('Already approved');
+//   }
+
+//   const admin = await this.adminRepo.findOne({
+//     where: { id: adminId }
+//   });
+
+//   if (!admin) {
+//     throw new UnauthorizedException('Invalid admin');
+//   }
+
+//   service.isApproved = true;
+//   service.approvedBy = admin;
+
+//   return await this.serviceRepo.save(service);
+// }
+
+//  async getPendingServices() {
+//     return this.serviceRepo.find({
+//       where: { isApproved: false },
+//     });
+//   }
+
+// async getServicesApprovedByAdmin(adminId: string) {
+//   const id = Number(adminId); 
+
+//   const admin = await this.adminRepo.findOne({ where: { id:adminId } });
+//   if (!admin) throw new NotFoundException('Admin not found');
+
+
+//   const services = await this.serviceRepo.find({
+//     where: { approvedBy: { id: admin.id } },
+//     relations: ['vendor', 'approvedBy'], 
+//   });
+
+//   return services;
+// }
+
+// async getServiceApprovedBy(serviceId: number) {
+//   const service = await this.serviceRepo.findOne({
+//     where: { id: String(serviceId) },
+//     relations: ['approvedBy'], 
+//   });
+
+//   if (!service) {
+//     throw new NotFoundException("Service not found");
+//   }
+
+//   if (!service.approvedBy) {
+//     return { message: "This service is not approved yet" };
+//   }
+
+
+//   return {
+//     serviceId: service.id,
+//     approvedBy: {
+//       id: service.approvedBy.id,
+//       name: service.approvedBy.name,
+//       email: service.approvedBy.email,
+//       role: service.approvedBy.role
+//     }
+//   };
+// }
 
 }
 
