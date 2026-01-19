@@ -79,6 +79,7 @@ async register(createUser: RegisterUserDto) {
 
 
 
+
 async getProfile(id:string)
 {
   const profile=await  this.userRepo.findOne({where:{id}});

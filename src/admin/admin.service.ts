@@ -24,29 +24,44 @@ export class AdminService {
 
 //...........................login..................//
 
-async login(loginDto: LoginDto): Promise<{ token: string; role: string }> {
-    const { email, password } = loginDto;
+// async login(loginDto: LoginDto): Promise<{ token: string; role: string }> {
+//     const { email, password } = loginDto;
 
-    // Find admin by email
-    const admin = await this.adminRepo.findOne({ where: { email } });
-    if (!admin) throw new UnauthorizedException('Invalid credentials');
+//     // Find admin by email
+//     const admin = await this.adminRepo.findOne({ where: { email } });
+//     if (!admin) throw new UnauthorizedException('Invalid credentials');
 
-    console.log('Login attempt with password:', password);
+//     console.log('Login attempt with password:', password);
 
-    console.log('Stored Hash from DB:', admin.password);
+//     console.log('Stored Hash from DB:', admin.password);
 
-    // Compare password
-    const isMatch = await bcrypt.compare(password, admin.password);
+//     // Compare password
+//     const isMatch = await bcrypt.compare(password, admin.password);
  
-    console.log('Bcrypt comparison result:', isMatch);
-    if (!isMatch) throw new UnauthorizedException('Invalid credentials');
+//     console.log('Bcrypt comparison result:', isMatch);
+//     if (!isMatch) throw new UnauthorizedException('Invalid credentials');
 
-    // Generate JWT
-    const payload = { id: admin.id, role: admin.role };
-    const token = this.jwtService.sign(payload);
+//     // Generate JWT
+//     const payload = { id: admin.id, role: admin.role };
+//     const token = this.jwtService.sign(payload);
 
-    return { token, role: admin.role };
-  }
+//     return { token, role: admin.role };
+//   }
+async login(loginDto: LoginDto): Promise<{ token: string; role: string }> {
+  const { email, password } = loginDto;
+
+  const admin = await this.adminRepo.findOne({ where: { email } });
+  if (!admin) throw new UnauthorizedException('Invalid credentials');
+
+  const isMatch = await bcrypt.compare(password, admin.password);
+  if (!isMatch) throw new UnauthorizedException('Invalid credentials');
+
+  const payload = { id: admin.id, role: admin.role };
+  const token = this.jwtService.sign(payload);
+
+  return { token, role: admin.role };
+}
+
 
   // -------------------- Create Admin (Only Super Admin) --------------------
 
@@ -98,6 +113,23 @@ async createAdmin(createAdminDto: CreateAdminDto, creator: AdminEntity): Promise
 
   return await this.adminRepo.save(admin);
 }
+//.............................get all admins..................//
+async getAllAdmins(): Promise<AdminEntity[]> {
+  return await this.adminRepo.find({
+    relations: ['createdBy'],
+    select: {
+      id: true,
+      name: true,
+      email: true,
+      role: true,
+      created_at: true,
+      createdBy: {
+        id: true,
+        name: true,
+      }
+    }
+  });
+}
 
 
 
@@ -144,6 +176,7 @@ async deleteCustomer(customerId: string) {
 async approveService(serviceId: string, adminId: string) {
   const service = await this.serviceRepo.findOne({
     where: { id: serviceId },
+    relations: ['approvedBy'], 
   });
 
   if (!service) {
@@ -165,9 +198,26 @@ async approveService(serviceId: string, adminId: string) {
   service.isApproved = true;
   service.approvedBy = admin;
 
-  return await this.serviceRepo.save(service);
-}
+  // Save the service
+  const updatedService = await this.serviceRepo.save(service);
 
+  // Return only the data you want the frontend to see
+  return {
+    id: updatedService.id,
+    title: updatedService.title,
+    isApproved: updatedService.isApproved,
+    approvedBy: {
+      name: admin.name,
+      email: admin.email,
+      role: admin.role,
+    },
+  };
+}
+async getAllServices() {
+  return this.serviceRepo.find({
+    relations: ['vendor'] 
+  });
+}
  async getPendingServices() {
     return this.serviceRepo.find({
       where: { isApproved: false },
@@ -215,6 +265,82 @@ async getServiceApprovedBy(serviceId: number) {
   };
 }
 
+
+//....................................................//
+
+// async approveService(serviceId: string, adminId: string) {
+//   const service = await this.serviceRepo.findOne({
+//     where: { id: serviceId },
+//   });
+
+//   if (!service) {
+//     throw new NotFoundException('Service not found');
+//   }
+
+//   if (service.isApproved) {
+//     throw new BadRequestException('Already approved');
+//   }
+
+//   const admin = await this.adminRepo.findOne({
+//     where: { id: adminId }
+//   });
+
+//   if (!admin) {
+//     throw new UnauthorizedException('Invalid admin');
+//   }
+
+//   service.isApproved = true;
+//   service.approvedBy = admin;
+
+//   return await this.serviceRepo.save(service);
+// }
+
+//  async getPendingServices() {
+//     return this.serviceRepo.find({
+//       where: { isApproved: false },
+//     });
+//   }
+
+// async getServicesApprovedByAdmin(adminId: string) {
+//   const id = Number(adminId); 
+
+//   const admin = await this.adminRepo.findOne({ where: { id:adminId } });
+//   if (!admin) throw new NotFoundException('Admin not found');
+
+
+//   const services = await this.serviceRepo.find({
+//     where: { approvedBy: { id: admin.id } },
+//     relations: ['vendor', 'approvedBy'], 
+//   });
+
+//   return services;
+// }
+
+// async getServiceApprovedBy(serviceId: number) {
+//   const service = await this.serviceRepo.findOne({
+//     where: { id: String(serviceId) },
+//     relations: ['approvedBy'], 
+//   });
+
+//   if (!service) {
+//     throw new NotFoundException("Service not found");
+//   }
+
+//   if (!service.approvedBy) {
+//     return { message: "This service is not approved yet" };
+//   }
+
+
+//   return {
+//     serviceId: service.id,
+//     approvedBy: {
+//       id: service.approvedBy.id,
+//       name: service.approvedBy.name,
+//       email: service.approvedBy.email,
+//       role: service.approvedBy.role
+//     }
+//   };
+// }
 
 }
 
