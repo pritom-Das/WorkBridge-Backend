@@ -7,6 +7,7 @@ import { CreateServiceDto } from './Dto/create_service.dto';
 import { LoginVendorDto } from './Dto/login.dto';
 // 1. IMPORT AuthGuard from passport directly
 import { AuthGuard } from '@nestjs/passport'; 
+import { UpdateServiceDto } from './Dto/update_service.dto';
 
 @Controller('vendors')
 export class VendorController {
@@ -84,6 +85,22 @@ export class VendorController {
     @Body() createServiceDto: CreateServiceDto,
   ) {
     return this.vendorService.createService(vendorId, createServiceDto);
+  }
+  // PROTECTED: Get Single Service details
+  @UseGuards(AuthGuard('vendor-jwt'))
+  @Get('service/:serviceId')
+  getServiceById(@Param('serviceId') serviceId: string) {
+    return this.vendorService.getServiceById(serviceId);
+  }
+
+  // PROTECTED: Update Service details
+  @UseGuards(AuthGuard('vendor-jwt'))
+  @Put('service/:serviceId')
+  updateService(
+    @Param('serviceId') serviceId: string,
+    @Body() body: UpdateServiceDto,
+  ) {
+    return this.vendorService.updateService(serviceId, body);
   }
   
   // PROTECTED: Use this for the Dashboard data

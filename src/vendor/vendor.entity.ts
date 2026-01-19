@@ -1,4 +1,4 @@
-import { Entity, PrimaryGeneratedColumn, Column, OneToMany, OneToOne, JoinColumn } from 'typeorm';
+import { Entity, PrimaryGeneratedColumn, Column, OneToMany, OneToOne } from 'typeorm'; // Remove JoinColumn from import if not used elsewhere
 import { Service } from './service.entity';
 import { VendorProfile } from './vendor_profile.entity';
 
@@ -19,11 +19,11 @@ export class Vendor {
   @Column({ default: false })
   isApproved: boolean;
 
-  @OneToOne(() => VendorProfile, (profile) => profile.vendor,{cascade:true})
-  @JoinColumn()
+  // ⚠️ CHANGE HERE: Remove @JoinColumn()
+  // The Vendor is the "Inverse" side. It does not hold the Foreign Key.
+  @OneToOne(() => VendorProfile, (profile) => profile.vendor, { cascade: true })
   profile: VendorProfile;
 
-  @OneToMany(() => Service, (service) => service.vendor,{cascade:true})
+  @OneToMany(() => Service, (service) => service.vendor, { cascade: true })
   services: Service[];
- 
 }
