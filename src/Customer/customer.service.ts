@@ -122,12 +122,12 @@ async delete(id:string)
 
 async findAllService()
 {
-  const services=await this.serviceRepo.find({where:{isApproved: true}});
-  if(services.length === 0)
-  {
-    throw new NotFoundException('No services found');
-  }
-  return services;
+  // const services=await this.serviceRepo.find({where:{isApproved: true}});
+  // if(services.length === 0)
+  // {
+  //   throw new NotFoundException('No services found');
+  // }
+  return await this.serviceRepo.find({ where: { isApproved: true } });
 }
 
 async findOne(id:string) 
