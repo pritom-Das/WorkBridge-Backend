@@ -1,11 +1,12 @@
 import { Controller, Get, Post, Delete, Param, Body, Patch, Put, ParseIntPipe, UseGuards, Res } from '@nestjs/common';
 import type { Response } from 'express'; 
-import { VendorService } from './vendor.service';   
+import { VendorService } from './vendor.service';    
 import { CreateVendorDto } from './Dto/create_vendor.dto';
-import {  UpdateVendorDto } from './Dto/update.dto';
+import { UpdateVendorDto } from './Dto/update.dto';
 import { CreateServiceDto } from './Dto/create_service.dto';
-import { JwtAuthGuard } from '../admin/JwtAuth.guards';  
 import { LoginVendorDto } from './Dto/login.dto';
+// 1. IMPORT AuthGuard from passport directly
+import { AuthGuard } from '@nestjs/passport'; 
 
 @Controller('vendors')
 export class VendorController {
@@ -22,15 +23,31 @@ export class VendorController {
   async login(@Body() body: LoginVendorDto, @Res({ passthrough: true }) res: Response) {
     const result = await this.vendorService.loginVendor(body);
     
-    
     res.cookie('token', result.access_token, {
       httpOnly: true,  
-      secure: false,   
+      secure: false, // Set to true if using HTTPS
       sameSite: 'lax',
       maxAge: 3600000,  
     });
 
-    return { message: 'Login successful' };
+    // Returns ID so frontend can save it
+    return { 
+      message: 'Login successful',
+      id: result.vendor.id,
+      name: result.vendor.name
+    };
+  }
+  // Add this inside your VendorController class
+
+  @Post('logout')
+  logout(@Res({ passthrough: true }) res: Response) {
+    res.clearCookie('token', {
+      httpOnly: true,
+      secure: false, // Match your login settings
+      sameSite: 'lax',
+    });
+    
+    return { message: 'Logged out successfully' };
   }
 
   @Get()
@@ -59,7 +76,8 @@ export class VendorController {
   }
 
   // PROTECTED: Only logged in Vendors can create services
-  @UseGuards(JwtAuthGuard)
+  // 2. UPDATED: Uses 'vendor-jwt' to match your new Strategy name
+  @UseGuards(AuthGuard('vendor-jwt'))
   @Post(':vendorId/services')
   createService(
     @Param('vendorId', ParseIntPipe) vendorId: number,
@@ -69,12 +87,14 @@ export class VendorController {
   }
   
   // PROTECTED: Use this for the Dashboard data
-  @UseGuards(JwtAuthGuard)
+  // 3. UPDATED: Uses 'vendor-jwt' here too
+  @UseGuards(AuthGuard('vendor-jwt'))
   @Get(':vendorId/profile')
   getProfile(@Param('vendorId', ParseIntPipe) vendorId: number) {
     return this.vendorService.getProfile(vendorId);
   }
 
+  // This can be public or protected depending on your needs
   @Get(':vendorId/services')
   getServicesByVendor(@Param('vendorId', ParseIntPipe) vendorId: number) {
     return this.vendorService.getServicesByVendor(vendorId);

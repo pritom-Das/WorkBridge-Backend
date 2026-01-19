@@ -27,24 +27,28 @@ export class VendorService {
   }
 
   // Login Logic for Task
-  async loginVendor(data: LoginVendorDto) {
-    const vendor = await this.vendorRepo.findOne({ where: { email: data.email } });
-    
-    if (!vendor) {
-      throw new UnauthorizedException('Invalid credentials');
-    }
+  // ... inside VendorService class
 
-    const isMatch = await bcrypt.compare(data.password, vendor.password);
-    if (!isMatch) {
-      throw new UnauthorizedException('Invalid credentials');
-    }
-
-    // Creating the payload for the JWT
-    const payload = { id: vendor.id, email: vendor.email, role: 'vendor' };
-    return {
-      access_token: this.jwtService.sign(payload),
-    };
+async loginVendor(data: LoginVendorDto) {
+  const vendor = await this.vendorRepo.findOne({ where: { email: data.email } });
+  
+  if (!vendor) {
+    throw new UnauthorizedException('Invalid credentials');
   }
+
+  const isMatch = await bcrypt.compare(data.password, vendor.password);
+  if (!isMatch) {
+    throw new UnauthorizedException('Invalid credentials');
+  }
+
+  const payload = { id: vendor.id, email: vendor.email, role: 'vendor' };
+  
+  // CHANGE HERE: Return the vendor object too
+  return {
+    access_token: this.jwtService.sign(payload),
+    vendor: vendor, 
+  };
+}
 
   getAllVendors() {
     return this.vendorRepo.find({ relations: { services: true } });
