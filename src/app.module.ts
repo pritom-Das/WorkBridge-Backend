@@ -13,7 +13,7 @@ import { TypeOrmModule } from '@nestjs/typeorm';
  port: 5432,
  username: 'postgres',
  password: '1234',
- database: 'workBridge',
+ database: 'WorkBridge',
  autoLoadEntities: true,
  synchronize: true,
  } ) ],
