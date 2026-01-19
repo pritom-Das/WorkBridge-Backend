@@ -23,7 +23,7 @@ export class VendorService {
     const salt = await bcrypt.genSalt();
     const hased = await bcrypt.hash(data.password, salt);
     const vendor = this.vendorRepo.create({ ...data, password: hased });
-    return this.vendorRepo.save(vendor);
+    return await this.vendorRepo.save(vendor);
   }
 
   // Login Logic for Task
