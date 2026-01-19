@@ -74,6 +74,8 @@ async register(createUser: RegisterUserDto) {
     const payload = { id: user.id, email: user.email, role: 'customer' };
     return {
       access_token: this.jwtService.sign(payload),
+      id: user.id,
+      role: user.role,
     };
   }
 

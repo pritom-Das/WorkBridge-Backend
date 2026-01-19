@@ -37,22 +37,35 @@ export class CustomerController {
       maxAge: 3600000,  
     });
 
-    return { message: 'Login successful' };
+    return { message: 'Login successful',
+      id: result.id,
+      role: result.role,
+     };
   }
 
-
+@Post('logout')
+  logout(@Res({ passthrough: true }) res: Response) {
+    res.clearCookie('token', {
+      httpOnly: true,
+      secure: false, // Match your login settings
+      sameSite: 'lax',
+    });
+   
+    return { message: 'Logged out successfully' };
+  }
 
   @Get('profile/:id')
   getProfile(@Param('id') id: string) 
   {
     return this.customerService.getProfile(id);
   }
-  @Put('profile/:id/updateProfile')
+  @Post('profile/:id/updateProfile')
   @UsePipes(new ValidationPipe() )
   updateProfile(@Param('id') id: string, @Body() updateUser:UpdateUserDto)
   {
     return this.customerService.updateProfile(id,updateUser);
   }
+
   @Delete('profile/delete/:id')//Delete user/:id
   delete(@Param('id')id:string) {
     return this.customerService.delete(id);

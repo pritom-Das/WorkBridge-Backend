@@ -62,6 +62,9 @@ export class UpdateUserDto {
   @IsString()
   @Matches(/^(?=.*[A-Z]).{6,}$/, { message: 'Password must be at least 6 characters long and contain at least one uppercase letter' })
   password: string;
+  
+  @IsOptional()
+  address: string;
 }
 //check login 
 export class LoginUserDto {
