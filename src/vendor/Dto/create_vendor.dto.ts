@@ -7,11 +7,19 @@ export class CreateVendorDto {
 
   @IsEmail()
   @IsNotEmpty()
-  @Contains('@gmail.com', { message: 'Email must be a gmail address' }  )
+  @Contains('@gmail.com', { message: 'Email must be a gmail address' })
   email: string;
 
   @MinLength(6)
   @IsNotEmpty()
-  @Matches(/^(?=.*[A-Z]).{6,}$/, {message: 'Password must be at least 6 characters long and contain at least one uppercase letter'})
+  @Matches(/^(?=.*[A-Z]).{6,}$/, {message: 'Password must be at least 6 characters long...'})
   password: string;
+ 
+  @IsString()
+  @IsNotEmpty()
+  address: string;
+
+  @IsString()
+  @IsNotEmpty()
+  phone: string; 
 }

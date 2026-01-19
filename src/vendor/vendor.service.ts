@@ -4,15 +4,18 @@ import { Repository } from 'typeorm';
 import { Vendor } from './vendor.entity';
 import { Service } from './service.entity';
 import { CreateVendorDto } from './Dto/create_vendor.dto';
-import { LoginVendorDto } from './Dto/update.dto'; 
+import { LoginVendorDto } from './Dto/update.dto'; // Ensure this path is correct
 import * as bcrypt from 'bcrypt';
-import { JwtService } from '@nestjs/jwt';  
+import { JwtService } from '@nestjs/jwt';   
+import { VendorProfile } from './vendor_profile.entity';
+
 @Injectable()
 export class VendorService {
   constructor(
     @InjectRepository(Vendor) private vendorRepo: Repository<Vendor>,
     @InjectRepository(Service) private serviceRepo: Repository<Service>,
-    private jwtService: JwtService,  
+    @InjectRepository(VendorProfile) private profileRepo: Repository<VendorProfile>,
+    private jwtService: JwtService,   
   ) {}
 
   async createVendor(data: CreateVendorDto) {
@@ -20,13 +23,32 @@ export class VendorService {
     if (existingVendor) {
       throw new ConflictException('Vendor with this email already exists');
     }
+
+    // 1. Hash Password
     const salt = await bcrypt.genSalt();
     const hased = await bcrypt.hash(data.password, salt);
-    const vendor = this.vendorRepo.create({ ...data, password: hased });
-    return this.vendorRepo.save(vendor);
+
+    // 2. Create Vendor (User Account)
+    const newVendor = this.vendorRepo.create({ 
+      name: data.name, 
+      email: data.email, 
+      password: hased 
+    });
+    
+    const savedVendor = await this.vendorRepo.save(newVendor);
+
+    // 3. Create Profile (Address, Phone) linked to Vendor
+    const newProfile = this.profileRepo.create({
+      address: data.address,
+      phone: data.phone,
+      vendor: savedVendor, 
+    });
+
+    await this.profileRepo.save(newProfile);
+
+    return savedVendor;
   }
 
-  // Login Logic for Task
   async loginVendor(data: LoginVendorDto) {
     const vendor = await this.vendorRepo.findOne({ where: { email: data.email } });
     
@@ -39,19 +61,27 @@ export class VendorService {
       throw new UnauthorizedException('Invalid credentials');
     }
 
-    // Creating the payload for the JWT
     const payload = { id: vendor.id, email: vendor.email, role: 'vendor' };
+    
     return {
       access_token: this.jwtService.sign(payload),
+      vendor: vendor, 
     };
   }
 
   getAllVendors() {
     return this.vendorRepo.find({ relations: { services: true } });
   }
-
+ 
   async getVendor(id: number) {
-    const vendor = await this.vendorRepo.findOne({ where: { id }, relations: { services: true } });
+    const vendor = await this.vendorRepo.findOne({ 
+      where: { id }, 
+      relations: { 
+        services: true,
+        profile: true   
+      } 
+    });
+    
     if (!vendor) {
       throw new NotFoundException('Vendor not found');
     }
@@ -90,5 +120,39 @@ export class VendorService {
 
   async getProfile(id: number) {
     return this.getVendor(id);
+  }
+  //  Single Service by ID (UUID is a string)
+  async getServiceById(id: string) {
+    const service = await this.serviceRepo.findOne({ where: { id } });
+    if (!service) {
+      throw new NotFoundException('Service not found');
+    }
+    return service;
+  }
+ 
+  async updateService(id: string, data: Partial<Service>) { 
+    await this.getServiceById(id); 
+    await this.serviceRepo.update(id, data); 
+    return this.getServiceById(id);
+  }
+ async getVendorReviews(vendorId: number) {
+    const services = await this.serviceRepo.find({
+      where: { vendor: { id: vendorId } },
+      relations: {
+        reviews: {
+          customer: true // Get reviewer details
+        },
+        orders: {          // ⚠️ NEW: Get orders to check verification
+          customer: true
+        }
+      },
+      order: {
+        reviews: {
+          createdAt: 'DESC'
+        }
+      }
+    });
+
+    return services.filter(service => service.reviews && service.reviews.length > 0);
   }
 }
