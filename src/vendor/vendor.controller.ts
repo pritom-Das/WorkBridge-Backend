@@ -116,4 +116,9 @@ export class VendorController {
   getServicesByVendor(@Param('vendorId', ParseIntPipe) vendorId: number) {
     return this.vendorService.getServicesByVendor(vendorId);
   }
+  @UseGuards(AuthGuard('vendor-jwt'))
+  @Get(':vendorId/reviews')
+  getVendorReviews(@Param('vendorId', ParseIntPipe) vendorId: number) {
+    return this.vendorService.getVendorReviews(vendorId);
+  }
 }

@@ -72,14 +72,13 @@ export class VendorService {
   getAllVendors() {
     return this.vendorRepo.find({ relations: { services: true } });
   }
-
-  // ⚠️ CRITICAL UPDATE HERE
+ 
   async getVendor(id: number) {
     const vendor = await this.vendorRepo.findOne({ 
       where: { id }, 
       relations: { 
         services: true,
-        profile: true  // <--- This fetches the phone/address from the other table
+        profile: true   
       } 
     });
     
@@ -135,5 +134,25 @@ export class VendorService {
     await this.getServiceById(id); 
     await this.serviceRepo.update(id, data); 
     return this.getServiceById(id);
+  }
+ async getVendorReviews(vendorId: number) {
+    const services = await this.serviceRepo.find({
+      where: { vendor: { id: vendorId } },
+      relations: {
+        reviews: {
+          customer: true // Get reviewer details
+        },
+        orders: {          // ⚠️ NEW: Get orders to check verification
+          customer: true
+        }
+      },
+      order: {
+        reviews: {
+          createdAt: 'DESC'
+        }
+      }
+    });
+
+    return services.filter(service => service.reviews && service.reviews.length > 0);
   }
 }
