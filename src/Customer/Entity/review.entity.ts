@@ -5,12 +5,16 @@ import { Service } from '../../vendor/service.entity';
 @Entity('reviews')
 export class ReviewEntity {
   @PrimaryGeneratedColumn('uuid')//change it
-  id: string;
+  id: string; 
 
   @ManyToOne(() =>  CustomerInfoEntity, (customer) => customer.reviews)
   customer: CustomerInfoEntity;
 
+<<<<<<< HEAD
   @ManyToOne(() => Service, (service) => service.reviews, { onDelete: 'CASCADE' })//{ onDelete: 'CASCADE' }) delete if error happens
+=======
+  @ManyToOne(() => Service, (service) => service.reviews, { onDelete: 'CASCADE' })
+>>>>>>> vendor
   service: Service;
 
   @Column({ type: 'int' })
