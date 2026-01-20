@@ -10,7 +10,7 @@ export class ReviewEntity {
   @ManyToOne(() =>  CustomerInfoEntity, (customer) => customer.reviews)
   customer: CustomerInfoEntity;
 
-  @ManyToOne(() => Service, (service) => service.reviews)
+  @ManyToOne(() => Service, (service) => service.reviews, { onDelete: 'CASCADE' })//{ onDelete: 'CASCADE' }) delete if error happens
   service: Service;
 
   @Column({ type: 'int' })

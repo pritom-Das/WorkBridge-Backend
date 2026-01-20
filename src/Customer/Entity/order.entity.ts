@@ -9,9 +9,9 @@ export class OrderEntity {
 
     @ManyToOne(() => CustomerInfoEntity, (customer) => customer.orders)
     customer: CustomerInfoEntity;
-  
-    
-    @ManyToOne(() => Service, (service) => service.orders)
+
+
+    @ManyToOne(() => Service, (service) => service.orders, { onDelete: 'CASCADE' })//{ onDelete: 'CASCADE' }) delete if error happens
     service: Service;
  
 
