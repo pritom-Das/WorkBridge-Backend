@@ -45,7 +45,7 @@ import type { Response } from 'express';
 
     res.cookie('access_token', token, {
       httpOnly: true,
-      secure: false, // true in production (HTTPS)
+      secure: false, 
       sameSite: 'lax',
       maxAge: 24 * 60 * 60 * 1000, // 1 day
     });
@@ -69,7 +69,7 @@ import type { Response } from 'express';
       httpOnly: true,
       expires: new Date(0), // Expire immediately
       sameSite: 'lax',
-      secure: false, // Match your login config (true in production)
+      secure: false, 
     });
 
     return { message: 'Logout successful' };
