@@ -6,6 +6,7 @@ import { Vendor } from './vendor.entity';
 import { Service } from './service.entity';
 import { VendorProfile } from './vendor_profile.entity';
 import { JwtModule } from '@nestjs/jwt';
+import { PusherService } from 'src/Notification/pusher.service';
 
 @Module({
   imports: [TypeOrmModule.forFeature([Vendor, Service, VendorProfile]),
@@ -15,6 +16,6 @@ import { JwtModule } from '@nestjs/jwt';
     }),
 ],
   controllers: [VendorController],
-  providers: [VendorService],
+  providers: [VendorService, PusherService],
 })
 export class VendorModule {}

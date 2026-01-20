@@ -131,7 +131,30 @@ async getAllAdmins(): Promise<AdminEntity[]> {
   });
 }
 
+// -------------------- Delete Admin (Only Super Admin) --------------------
+async deleteAdmin(adminId: string, creator: AdminEntity): Promise<{ message: string }> {
+  // 1. Check if the person trying to delete is a super-admin
+  if (creator.role !== 'super-admin') {
+    throw new UnauthorizedException('Only super admin can delete admins');
+  }
 
+  // 2. Find the admin to be deleted
+  const adminToDelete = await this.adminRepo.findOne({ where: { id: adminId } });
+
+  if (!adminToDelete) {
+    throw new NotFoundException(`Admin with ID ${adminId} not found`);
+  }
+
+  // 3. Prevent deleting another super-admin or self (Safety check)
+  if (adminToDelete.role === 'super-admin') {
+    throw new BadRequestException('Super admins cannot be deleted via this route');
+  }
+
+  // 4. Perform the deletion
+  await this.adminRepo.delete(adminId);
+
+  return { message: `Admin "${adminToDelete.name}" deleted successfully` };
+}
 
 // ................customer service...................
 async getAllCustomers() {

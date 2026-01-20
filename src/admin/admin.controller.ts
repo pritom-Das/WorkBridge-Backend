@@ -1,4 +1,4 @@
-    import { Body, ConflictException, Controller, Delete, Get, Param, Patch, Post, Query, Req, Res, UploadedFile, UseGuards, UseInterceptors } from '@nestjs/common';
+    import { Body, ConflictException, Controller, Delete, Get, Param, ParseIntPipe, Patch, Post, Query, Req, Res, UploadedFile, UseGuards, UseInterceptors } from '@nestjs/common';
     import { AdminService } from './admin.service';
 import { updateCustomerStatusDto } from './Dtos/UpdateCustomerStatus.dto';
 import { updateVendorStatus } from './Dtos/UpdateVendorStatus.dto';
@@ -13,68 +13,76 @@ import type { Response } from 'express';
 
 
 
-    @Controller('admin')
-    export class AdminController {
-     
-        constructor(private readonly adminService:AdminService){}
-    
-        // -------------------- Super Admin Login --------------------
-  @Post('super-login')
-  async superAdminLogin(@Body() loginDto: LoginDto) {
-    return this.adminService.login(loginDto);
+      @Controller('admin')
+      export class AdminController {
+      
+          constructor(private readonly adminService:AdminService){}
+      
+          // -------------------- Super Admin Login --------------------
+    @Post('super-login')
+    async superAdminLogin(@Body() loginDto: LoginDto) {
+      return this.adminService.login(loginDto);
+    }
+
+    //...........................get all admin.....................//
+  @UseGuards(JwtAuthGuard)
+  @Get('alladmins')
+  async getAllAdmins() {
+    return this.adminService.getAllAdmins();
   }
 
-  //...........................get all admin.....................//
-@UseGuards(JwtAuthGuard)
-@Get('alladmins')
-async getAllAdmins() {
-  return this.adminService.getAllAdmins();
-}
+    // -------------------- Admin Login --------------------
+    // @Post('login')
+    // async adminLogin(@Body() loginDto: LoginDto) {
+    //   return this.adminService.login(loginDto);
+    // }
+    @Post('login')
+  async adminLogin(
+    @Body() loginDto: LoginDto,
+    @Res({ passthrough: true }) res: Response
+  ) {
+    const { token, role } = await this.adminService.login(loginDto);
 
-  // -------------------- Admin Login --------------------
-  // @Post('login')
-  // async adminLogin(@Body() loginDto: LoginDto) {
-  //   return this.adminService.login(loginDto);
-  // }
-  @Post('login')
-async adminLogin(
-  @Body() loginDto: LoginDto,
-  @Res({ passthrough: true }) res: Response
+    res.cookie('access_token', token, {
+      httpOnly: true,
+      secure: false, // true in production (HTTPS)
+      sameSite: 'lax',
+      maxAge: 24 * 60 * 60 * 1000, // 1 day
+    });
+
+    return { message: 'Login successful', role };
+  }
+
+
+
+  @UseGuards(JwtAuthGuard)
+  @Post('create')
+  async createAdmin(@Body() createAdminDto: CreateAdminDto, @Req() req) {
+
+    return this.adminService.createAdmin(createAdminDto, req.user);
+  }
+
+  @Post('logout')
+  async logout(@Res({ passthrough: true }) res: Response) {
+    // Clearing the cookie by setting its expiration date to the past
+    res.cookie('access_token', '', {
+      httpOnly: true,
+      expires: new Date(0), // Expire immediately
+      sameSite: 'lax',
+      secure: false, // Match your login config (true in production)
+    });
+
+    return { message: 'Logout successful' };
+  }
+@UseGuards(JwtAuthGuard)
+@Delete('delete/:id')
+async deleteAdmin(
+  @Param('id') id: string, 
+  @Req() req
 ) {
-  const { token, role } = await this.adminService.login(loginDto);
-
-  res.cookie('access_token', token, {
-    httpOnly: true,
-    secure: false, // true in production (HTTPS)
-    sameSite: 'lax',
-    maxAge: 24 * 60 * 60 * 1000, // 1 day
-  });
-
-  return { message: 'Login successful', role };
+  // req.user is populated by your JwtAuthGuard
+  return this.adminService.deleteAdmin(id, req.user);
 }
-
-
-
-@UseGuards(JwtAuthGuard)
-@Post('create')
-async createAdmin(@Body() createAdminDto: CreateAdminDto, @Req() req) {
-
-  return this.adminService.createAdmin(createAdminDto, req.user);
-}
-
-@Post('logout')
-async logout(@Res({ passthrough: true }) res: Response) {
-  // Clearing the cookie by setting its expiration date to the past
-  res.cookie('access_token', '', {
-    httpOnly: true,
-    expires: new Date(0), // Expire immediately
-    sameSite: 'lax',
-    secure: false, // Match your login config (true in production)
-  });
-
-  return { message: 'Logout successful' };
-}
-
 
 //   ...........................customer management.....................//
 

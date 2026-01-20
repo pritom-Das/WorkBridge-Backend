@@ -10,6 +10,7 @@ import { CreateProfileDto } from './Dto/create_profile.dto';
 import { UpdateProfileDto } from './Dto/update_profile.dto';
 import { LoginVendorDto } from './Dto/update.dto';
 import { JwtService } from '@nestjs/jwt';
+import { PusherService } from 'src/Notification/pusher.service';
 
 @Injectable()
 export class VendorService { 
@@ -17,8 +18,12 @@ export class VendorService {
     private jwtService: JwtService ,
     @InjectRepository(Vendor) private vendorRepo: Repository<Vendor>,
    @InjectRepository(Service)private serviceRepo: Repository<Service>,
+  
    @InjectRepository(VendorProfile)
-  private profileRepo: Repository<VendorProfile>) {}
+  private profileRepo: Repository<VendorProfile>,
+    private readonly pusherService: PusherService,
+)
+   {}
 
   async createVendor(data:CreateVendorDto){
   const existingVendor= await this.vendorRepo.findOne({where:{email:data.email}});
@@ -58,11 +63,32 @@ export class VendorService {
     const vendor= await this.getVendor(id);
     return this.vendorRepo.remove(vendor);
   }
-  async createService(vendorId:number, data:Partial<Service>){
-    const vendor= await this.getVendor(vendorId);
-    const service=this.serviceRepo.create({...data,vendor});
-    return this.serviceRepo.save(service);
+  // async createService(vendorId:number, data:Partial<Service>){
+  //   const vendor= await this.getVendor(vendorId);
+  //   const service=this.serviceRepo.create({...data,vendor});
+  //   return this.serviceRepo.save(service);
+  // }
+
+  async createService(vendorId: number, data: Partial<Service>) {
+  const vendor = await this.getVendor(vendorId);
+  const service = this.serviceRepo.create({ ...data, vendor });
+  
+  // Save to DB
+  const savedService = await this.serviceRepo.save(service);
+
+  // Trigger Real-time Notification
+  try {
+    await this.pusherService.trigger('admin-channel', 'new-service', {
+      message: `New service: ${savedService.title}`,
+      vendorName: vendor.name,
+    });
+  } catch (err) {
+    console.error("Pusher trigger failed, but service was saved:", err);
   }
+
+  return savedService;
+}
+
   async getServicesByVendor(vendorId:number){
   return this.serviceRepo.find({where:{vendor:{id:vendorId}},
   relations:['vendor']});
@@ -121,6 +147,7 @@ async updateProfile(vendorId: number, body: UpdateProfileDto) {
 
   return {
     access_token: await this.jwtService.signAsync(payload),
+   role: 'vendor'
   };
 }
 
