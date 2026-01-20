@@ -5,12 +5,12 @@ import { Service } from '../../vendor/service.entity';
 @Entity('reviews')
 export class ReviewEntity {
   @PrimaryGeneratedColumn('uuid')//change it
-  id: string;
+  id: string; 
 
   @ManyToOne(() =>  CustomerInfoEntity, (customer) => customer.reviews)
   customer: CustomerInfoEntity;
 
-  @ManyToOne(() => Service, (service) => service.reviews)
+  @ManyToOne(() => Service, (service) => service.reviews, { onDelete: 'CASCADE' })
   service: Service;
 
   @Column({ type: 'int' })
