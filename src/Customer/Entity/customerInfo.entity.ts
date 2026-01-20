@@ -22,7 +22,7 @@ export class CustomerInfoEntity {
     email:string;
     @Column({ type: 'enum', enum: ['male', 'female', 'other'] })
     gender:'male' | 'female' | 'other';
-    @Column()
+    @Column({ nullable: true })
     phoneNumber:string;
     @Column({ type: 'enum', enum: ['customer', 'vendor'] })
     role:'customer' | 'vendor';
